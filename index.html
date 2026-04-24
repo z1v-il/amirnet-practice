@@ -10,17 +10,42 @@
 <body>
 
     <header>
-        <h1>Amirnet Pro 🚀</h1>
-        <p>Advanced English Proficiency Training</p>
+        <div class="logo-area">
+            <h1>Amirnet Pro 🚀</h1>
+            <p>Advanced English Proficiency Training</p>
+        </div>
+        
+        <div class="user-api-area">
+            <div class="user-icon">👤</div>
+            <div class="api-inputs">
+                <input type="password" id="gemini-api-key" placeholder="הכנס מפתח AI..." />
+                <button class="btn-api-save" onclick="saveApiKey()">שמור</button>
+            </div>
+        </div>
     </header>
 
-    <nav>
-        <button id="btn-vocab" class="active" onclick="switchTab('vocab')">כרטיסיות</button>
-        <button id="btn-quiz" onclick="switchTab('quiz')">מבחן אמריקאי</button>
-        <button id="btn-reading" onclick="switchTab('reading')">הבנת הנקרא</button>
-        <button id="btn-bank" onclick="switchTab('bank')">ניהול מילים</button>
-        <button id="btn-live-ai" onclick="switchTab('live-ai')">AI חי (השלמת משפטים)</button>
+    <nav class="main-nav">
+        <button id="main-btn-words" class="active" onclick="switchMainTab('words')">תרגול מילים</button>
+        <button id="main-btn-restate" onclick="switchMainTab('restate')">ניסוח מחדש</button>
+        <button id="main-btn-exams" onclick="switchMainTab('exams')">מבחנים מלאים</button>
     </nav>
+
+    <nav class="sub-nav" id="sub-nav-words">
+        <button id="btn-vocab" class="active" onclick="switchSubTab('vocab')">כרטיסיות</button>
+        <button id="btn-quiz" onclick="switchSubTab('quiz')">מבחן אמריקאי</button>
+        <button id="btn-live-ai" onclick="switchSubTab('live-ai')">השלמת משפטים (AI)</button>
+        <button id="btn-bank" onclick="switchSubTab('bank')">ניהול מילים</button>
+    </nav>
+
+    <nav class="sub-nav" id="sub-nav-restate" style="display:none;">
+        <button id="btn-restate-container" class="active">תרגול ניסוח מחדש</button>
+    </nav>
+
+    <nav class="sub-nav" id="sub-nav-exams" style="display:none;">
+        <button id="btn-exams-container" class="active">סימולציה מלאה</button>
+        <button id="btn-reading" onclick="switchSubTab('reading')">מאגר טקסטים ישן</button>
+    </nav>
+
 
     <div id="vocab" class="container active fade-in">
         <div class="stats-bar">
@@ -52,23 +77,26 @@
         
         <div class="quiz-card">
             <h1 id="mc-word" class="mc-title">Word</h1>
-            <div id="mc-options" class="mc-grid">
-                </div>
+            <div id="mc-options" class="mc-grid"></div>
             <div id="mc-feedback" class="feedback-box"></div>
             <button id="mc-next-btn" class="btn-primary" style="display:none; width: 100%; margin-top: 15px;" onclick="loadMultipleChoice()">שאלה הבאה ➔</button>
         </div>
     </div>
 
-    <div id="reading" class="container fade-in">
-        <h2>הבנת הנקרא (10 טקסטים אקדמיים)</h2>
-        <select id="text-selector" class="dropdown" onchange="loadSelectedText()">
-            </select>
+    <div id="live-ai" class="container fade-in">
+        <h2>השלמת משפטים - AI בזמן אמת</h2>
         
-        <div class="text-box" id="reading-text-box">
+        <div id="ai-quiz-section" style="text-align: center;">
+            <button class="btn-primary" id="generate-ai-btn" onclick="generateAISentence()" style="width: 100%; margin-bottom: 20px;">ייצר משפט אקדמי חדש 🤖</button>
+            
+            <div id="ai-loading" style="display: none;">ה-AI כותב משפט...</div>
+            
+            <div id="ai-quiz-content" class="quiz-card" style="display: none;">
+                <p id="ai-sentence" style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia', serif; line-height: 1.6; color: var(--text-dark);"></p>
+                <div id="ai-options" class="mc-grid"></div>
+                <div id="ai-feedback" class="feedback-box"></div>
             </div>
-
-        <div id="quiz-container">
-            </div>
+        </div>
     </div>
 
     <div id="bank" class="container fade-in">
@@ -89,27 +117,36 @@
         </div>
     </div>
 
-    <div id="live-ai" class="container fade-in">
-        <h2>השלמת משפטים - AI בזמן אמת</h2>
+    <div id="restate-container" class="container fade-in">
+        <h2>ניסוח מחדש (Restatements)</h2>
         
-        <div id="api-key-section" class="stats-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">;
-            <label for="gemini-api-key" style="font-weight: bold;">הכנס מפתח API של Google Gemini:</label>
-            <input type="password" id="gemini-api-key" placeholder="AIzaSy..." />
-            <button class="btn-primary" onclick="saveApiKey()">שמור מפתח (בזיכרון הדפדפן בלבד)</button>
-        </div>
-
-        <div id="ai-quiz-section" style="display: none; text-align: center;">
-            <button class="btn-primary" id="generate-ai-btn" onclick="generateAISentence()" style="width: 100%; margin-bottom: 20px;">ייצר משפט אקדמי חדש 🤖</button>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn-primary" id="generate-restate-btn" onclick="generateRestatement()" style="width: 100%; margin-bottom: 20px;">ייצר שאלת ניסוח מחדש 🤖</button>
             
-            <div id="ai-loading" style="display: none;">ה-AI כותב משפט...</div>
+            <div id="restate-loading" style="display: none; font-size: 1.2rem; color: var(--secondary); font-weight: bold; animation: pulse 1.5s infinite; margin: 20px 0;">ה-AI מנסח שאלה אקדמית...</div>
             
-            <div id="ai-quiz-content" class="quiz-card" style="display: none;">
-                <p id="ai-sentence" style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia', serif; line-height: 1.6; color: var(--text-dark);"></p>
-                <div id="ai-options" class="mc-grid">
-                    </div>
-                <div id="ai-feedback" class="feedback-box"></div>
+            <div id="restate-quiz-content" class="quiz-card" style="display: none;">
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                    <p id="restate-original" style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia', serif; line-height: 1.6; color: white; margin: 0;"></p>
+                </div>
+                
+                <div id="restate-options" class="options" style="gap: 15px;"></div>
+                
+                <div id="restate-feedback" class="feedback-box" style="margin-top: 25px;"></div>
             </div>
         </div>
+    </div>
+
+    <div id="exams-container" class="container fade-in">
+        <h2>סימולציית אמירנט מלאה</h2>
+        <p style="text-align: center; color: var(--text-muted);">בקרוב: ייצור מבחן שלם הכולל השלמת משפטים, ניסוח מחדש והבנת הנקרא.</p>
+        </div>
+
+    <div id="reading" class="container fade-in">
+        <h2>הבנת הנקרא (10 טקסטים אקדמיים)</h2>
+        <select id="text-selector" class="dropdown" onchange="loadSelectedText()"></select>
+        <div class="text-box" id="reading-text-box"></div>
+        <div id="quiz-container"></div>
     </div>
 
     <script src="data.js"></script>

@@ -6,11 +6,8 @@ let currentQuizWord = null;
 
 // --- Initialize App ---
 function initApp() {
-    // Cache loading from localStorage
     const savedProgress = localStorage.getItem('amirnet_learned_words');
     learnedWords = savedProgress ? JSON.parse(savedProgress) : [];
-    
-    // Filter unlearned words from the master list (allWords comes from data.js)
     unlearnedWords = allWords.filter(word => !learnedWords.includes(word.eng));
     
     updateStats();
@@ -18,7 +15,6 @@ function initApp() {
     loadMultipleChoice();
     renderWordBank();
     
-    // Setup Reading Dropdown
     const selector = document.getElementById('text-selector');
     readingData.forEach((item, index) => {
         let opt = document.createElement('option');
@@ -28,7 +24,11 @@ function initApp() {
     });
     loadSelectedText();
 
-    initAiTab();
+    // טעינת מפתח ה-API ל-Header אם הוא קיים
+    geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+    if(geminiApiKey) {
+        document.getElementById('gemini-api-key').value = geminiApiKey;
+    }
 }
 
 function updateStats() {
@@ -291,12 +291,35 @@ function checkReadingAnswer(element, selectedIndex, correctIndex, optionsContain
 }
 
 // --- Navigation ---
-function switchTab(tabId) {
+function switchMainTab(mainTabId) {
+    // 1. צובע את הכפתור הראשי
+    document.querySelectorAll('.main-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('main-btn-' + mainTabId).classList.add('active');
+
+    // 2. מעלים את כל תתי-התפריטים והמסכים
+    document.querySelectorAll('.sub-nav').forEach(nav => nav.style.display = 'none');
     document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+
+    // 3. מציג את תת התפריט הנכון
+    const subNav = document.getElementById('sub-nav-' + mainTabId);
+    if (subNav) subNav.style.display = 'flex';
+
+    // 4. מעביר למסך ברירת המחדל של כל קטגוריה
+    if (mainTabId === 'words') switchSubTab('vocab');
+    if (mainTabId === 'restate') switchSubTab('restate-container');
+    if (mainTabId === 'exams') switchSubTab('exams-container');
+}
+
+function switchSubTab(tabId) {
+    // מנקה צביעה מכל כפתורי תת-התפריט
+    document.querySelectorAll('.sub-nav button').forEach(b => b.classList.remove('active'));
+    // מסתיר את כל המסכים
+    document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
     
+    // מציג את המסך המבוקש וצובע את הכפתור שלו
     document.getElementById(tabId).classList.add('active');
-    document.getElementById('btn-' + tabId).classList.add('active');
+    const btn = document.getElementById('btn-' + tabId);
+    if(btn) btn.classList.add('active');
 }
 
 // Boot the app
@@ -326,8 +349,7 @@ function saveApiKey() {
     if (key) {
         geminiApiKey = key;
         localStorage.setItem('gemini_api_key', geminiApiKey);
-        document.getElementById('api-key-section').style.display = 'none';
-        document.getElementById('ai-quiz-section').style.display = 'block';
+        alert('המפתח נשמר בהצלחה! 🚀');
     } else {
         alert('יש להזין מפתח תקין.');
     }
@@ -524,6 +546,180 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         feedback.innerHTML = `טעות.<br><br>
         <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
             <strong style="color: var(--secondary);">למה זו התשובה?</strong> ${explanation}
+        </div>`;
+        feedback.style.color = "var(--danger)";
+    }
+}
+
+// ==========================================
+// --- 6. Live AI Restatements Logic ---
+// ==========================================
+
+async function generateRestatement() {
+    if (!geminiApiKey) {
+        alert("חסר מפתח API. הכנס מפתח למעלה מימין ושמור.");
+        return;
+    }
+
+    // איפוס הממשק לפני הבקשה
+    document.getElementById('restate-quiz-content').style.display = 'none';
+    document.getElementById('generate-restate-btn').style.display = 'none';
+    document.getElementById('restate-loading').style.display = 'block';
+    document.getElementById('restate-feedback').innerHTML = ''; 
+
+    const promptText = `You are an expert test writer for the Israeli Psychometric and Amirnet English exams. 
+    Generate a C1-level "Restatement" question. 
+    
+    RULES:
+    1. Write a complex, academic original sentence (20-30 words) with advanced vocabulary and a specific logical structure.
+    2. Provide exactly 4 multiple-choice options.
+    3. The CORRECT option must convey the EXACT SAME meaning as the original sentence, but use completely DIFFERENT vocabulary and grammatical structure.
+    4. The 3 INCORRECT options must be plausible but logically flawed.
+    5. Write a short explanation IN HEBREW (max 20 words) explaining why the correct option is the only one that maintains the original meaning.
+    
+    CRITICAL JSON RULES:
+    1. Return ONLY a raw JSON object. Do NOT wrap it in \`\`\`json tags.
+    2. NEVER use double quotes (") inside your text values! Use single quotes (') instead.
+    
+    Format exactly like this:
+    {
+        "original": "The original complex sentence...",
+        "options": [
+            "Option 1...",
+            "Option 2...",
+            "Option 3...",
+            "Option 4..."
+        ],
+        "correctIndex": 0,
+        "explanation": "הסבר קצר בעברית שמסביר את הטריק"
+    }`;
+
+    try {
+        // המנגנון החכם: סורק את המודלים כדי לא לקבל שגיאות 400 או 404 מגוגל
+        const fallbackModels = [
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-8b",
+            "gemini-2.0-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-2.5-flash"
+        ];
+
+        let response;
+        let successfulModel = null;
+        
+        // אם מצאנו כבר מודל שעובד בפעולה קודמת, נשתמש בו ישר
+        const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
+
+        for (const modelName of modelsToTry) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
+            
+            try {
+                console.log(`מנסה את מודל: ${modelName}...`);
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
+                });
+
+                if (response.status === 503 || response.status === 429) {
+                    console.warn(`המודל ${modelName} עמוס, מחכה 2 שניות ומנסה שוב...`);
+                    await new Promise(r => setTimeout(r, 2000));
+                    response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }] }]
+                        })
+                    });
+                }
+
+                if (response.ok) {
+                    successfulModel = modelName;
+                    workingGeminiModel = modelName; 
+                    console.log(`✅ בינגו! ננעל על המודל: ${successfulModel}`);
+                    break; 
+                } else {
+                    // שואב את השגיאה המדויקת מגוגל כדי שנדע מה קרה
+                    const errText = await response.text();
+                    console.warn(`❌ המודל ${modelName} החזיר שגיאה ${response.status}: ${errText}`);
+                }
+            } catch (e) {
+                console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
+            }
+        }
+
+        if (!successfulModel || !response || !response.ok) {
+            throw new Error("כל המודלים נכשלו. פתח Console (F12) כדי לראות את פירוט השגיאה המדויק משרתי גוגל.");
+        }
+
+        const data = await response.json();
+        let jsonText = data.candidates[0].content.parts[0].text;
+        
+        // ניקוי עטיפות markdown כדי שה-JSON ייקרא כמו שצריך
+        jsonText = jsonText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        const result = JSON.parse(jsonText);
+        renderRestatementQuiz(result);
+
+    } catch (error) {
+        console.error("שגיאה שנתפסה:", error);
+        workingGeminiModel = null; // איפוס כדי שיסרוק מחדש
+        alert("תקלה מול ה-AI: " + error.message);
+    } finally {
+        document.getElementById('restate-loading').style.display = 'none';
+        document.getElementById('generate-restate-btn').style.display = 'inline-block';
+    }
+}
+
+function renderRestatementQuiz(data) {
+    document.getElementById('restate-quiz-content').style.display = 'block';
+    document.getElementById('restate-original').innerText = data.original || data.Original;
+    
+    const optionsContainer = document.getElementById('restate-options');
+    optionsContainer.innerHTML = '';
+    optionsContainer.classList.remove('answered');
+    
+    // שמירת ההסבר למקרה שהמשתמש יטעה או יצדק
+    optionsContainer.dataset.explanation = data.explanation || "לא סופק הסבר.";
+
+    const optionsArray = data.options || data.Options || [];
+    const correctIndex = data.correctIndex !== undefined ? data.correctIndex : data.CorrectIndex;
+
+    optionsArray.forEach((optText, index) => {
+        let optElement = document.createElement('div');
+        optElement.className = 'option';
+        optElement.style.fontSize = '1.1rem';
+        optElement.innerText = optText;
+        
+        optElement.onclick = () => checkRestatementAnswer(optElement, index, correctIndex, optionsContainer);
+        optionsContainer.appendChild(optElement);
+    });
+}
+
+function checkRestatementAnswer(element, selectedIndex, correctIndex, optionsContainer) {
+    if (optionsContainer.classList.contains('answered')) return;
+    optionsContainer.classList.add('answered');
+    
+    // סימון התשובה הנכונה
+    const allOptions = optionsContainer.children;
+    allOptions[correctIndex].classList.add('correct');
+
+    const feedback = document.getElementById('restate-feedback');
+    const explanation = optionsContainer.dataset.explanation;
+
+    if (selectedIndex === correctIndex) {
+        feedback.innerHTML = `מדויק! ✔️<br><br>
+        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <strong style="color: var(--secondary);">הסבר:</strong> ${explanation}
+        </div>`;
+        feedback.style.color = "var(--success)";
+    } else {
+        element.classList.add('wrong');
+        feedback.innerHTML = `פספסת.<br><br>
+        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <strong style="color: var(--secondary);">למה התשובה הירוקה נכונה?</strong> ${explanation}
         </div>`;
         feedback.style.color = "var(--danger)";
     }
