@@ -3,9 +3,17 @@ let unlearnedWords = [];
 let learnedWords = [];
 let currentFlashcardWord = null;
 let currentQuizWord = null;
+let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+let currentAiWordObj = null;
+let workingGeminiModel = null;
+
 // --- AI Saved Bank ---
 let savedAiSentences = JSON.parse(localStorage.getItem('saved_ai_sentences')) || [];
 let savedAiRestatements = JSON.parse(localStorage.getItem('saved_ai_restatements')) || [];
+
+// ניהול התקדמות במאגר הסטטי
+let staticSentIndex = parseInt(localStorage.getItem('static_sent_index')) || 0;
+let staticRestIndex = parseInt(localStorage.getItem('static_rest_index')) || 0;
 
 // --- Initialize App ---
 function initApp() {
@@ -17,6 +25,7 @@ function initApp() {
     loadRandomFlashcard();
     loadMultipleChoice();
     renderWordBank();
+    updateBankUI(); // טוען את מספרי השאלות לכפתורים
     
     const selector = document.getElementById('text-selector');
     readingData.forEach((item, index) => {
@@ -27,8 +36,6 @@ function initApp() {
     });
     loadSelectedText();
 
-    // טעינת מפתח ה-API ל-Header אם הוא קיים
-    geminiApiKey = localStorage.getItem('gemini_api_key') || '';
     if(geminiApiKey) {
         document.getElementById('gemini-api-key').value = geminiApiKey;
     }
@@ -39,6 +46,24 @@ function updateStats() {
     document.getElementById('remaining-count').innerText = unlearnedWords.length;
     document.getElementById('bank-learned-count').innerText = learnedWords.length;
     document.getElementById('bank-unlearned-count').innerText = unlearnedWords.length;
+}
+
+function updateBankUI() {
+    if (document.getElementById('static-sent-num')) 
+        document.getElementById('static-sent-num').innerText = staticSentIndex + 1;
+    if (document.getElementById('static-rest-num')) 
+        document.getElementById('static-rest-num').innerText = staticRestIndex + 1;
+}
+
+function advanceProgress() {
+    if (window.lastQuestionType === 'static-sent') {
+        staticSentIndex++;
+        localStorage.setItem('static_sent_index', staticSentIndex);
+    } else if (window.lastQuestionType === 'static-rest') {
+        staticRestIndex++;
+        localStorage.setItem('static_rest_index', staticRestIndex);
+    }
+    updateBankUI();
 }
 
 // --- 1. Flashcards Logic ---
@@ -67,7 +92,6 @@ function markWord(knewIt) {
     if (!currentFlashcardWord || unlearnedWords.length === 0) return;
 
     if (knewIt) {
-        // Add to cache
         learnedWords.push(currentFlashcardWord.eng);
         localStorage.setItem('amirnet_learned_words', JSON.stringify(learnedWords));
         unlearnedWords = unlearnedWords.filter(w => w.eng !== currentFlashcardWord.eng);
@@ -75,19 +99,16 @@ function markWord(knewIt) {
     updateStats();
     renderWordBank();
     loadRandomFlashcard();
-    loadMultipleChoice(); // Refresh quiz word too
+    loadMultipleChoice();
 }
 
-// --- 2. Multiple Choice Quiz Logic ---
 // --- 2. Multiple Choice Quiz Logic ---
 function loadMultipleChoice() {
     const optionsContainer = document.getElementById('mc-options');
     const feedback = document.getElementById('mc-feedback');
     const nextBtn = document.getElementById('mc-next-btn');
     
-    // הנה השורה שפותחת את המנעול לשאלה החדשה!
     optionsContainer.classList.remove('locked');
-
     optionsContainer.innerHTML = '';
     feedback.innerText = '';
     nextBtn.style.display = 'none';
@@ -97,11 +118,9 @@ function loadMultipleChoice() {
         return;
     }
 
-    // Pick a correct word
     currentQuizWord = unlearnedWords[Math.floor(Math.random() * unlearnedWords.length)];
     document.getElementById('mc-word').innerText = currentQuizWord.eng;
 
-    // Pick 3 random wrong answers from the FULL list (to make it hard)
     let options = [currentQuizWord.heb];
     while(options.length < 4) {
         let randomWrong = allWords[Math.floor(Math.random() * allWords.length)].heb;
@@ -110,10 +129,8 @@ function loadMultipleChoice() {
         }
     }
 
-    // Shuffle options
     options.sort(() => Math.random() - 0.5);
 
-    // Create buttons
     options.forEach(opt => {
         let btn = document.createElement('div');
         btn.className = 'mc-option';
@@ -124,11 +141,9 @@ function loadMultipleChoice() {
 }
 
 function checkQuizAnswer(selectedBtn, selectedHeb, correctHeb, container) {
-    // מונע לחיצה כפולה אחרי שכבר ענית
     if (container.classList.contains('locked')) return;
     container.classList.add('locked');
 
-    // צביעת התשובות
     Array.from(container.children).forEach(btn => {
         if (btn.innerText === correctHeb) btn.classList.add('correct');
         if (btn.innerText === selectedHeb && selectedHeb !== correctHeb) btn.classList.add('wrong');
@@ -136,24 +151,19 @@ function checkQuizAnswer(selectedBtn, selectedHeb, correctHeb, container) {
 
     const feedback = document.getElementById('mc-feedback');
     
-    // אם התשובה נכונה - מחברים למערכת הראשית
     if (selectedHeb === correctHeb) {
         feedback.innerText = "תשובה נכונה! ✔️ המילה הועברה למאגר המילים שלמדת.";
         feedback.style.color = "var(--success)";
         
-        // מוודאים שהמילה עוד לא ברשימת הידועים לפני שמוסיפים
         if (!learnedWords.includes(currentQuizWord.eng)) {
             learnedWords.push(currentQuizWord.eng);
             unlearnedWords = unlearnedWords.filter(w => w.eng !== currentQuizWord.eng);
             
-            // שמירה בזיכרון של הדפדפן
             localStorage.setItem('amirnet_learned_words', JSON.stringify(learnedWords));
             
-            // עדכון כל הנתונים במסכים האחרים
             updateStats();
             renderWordBank();
             
-            // אם המילה הזו בדיוק הוצגה גם בכרטיסיות, נרענן את הכרטיסייה למילה חדשה
             if (currentFlashcardWord && currentFlashcardWord.eng === currentQuizWord.eng) {
                 loadRandomFlashcard();
             }
@@ -163,7 +173,6 @@ function checkQuizAnswer(selectedBtn, selectedHeb, correctHeb, container) {
         feedback.style.color = "var(--danger)";
     }
     
-    // הצגת כפתור לשאלה הבאה
     document.getElementById('mc-next-btn').style.display = 'block';
 }
 
@@ -187,7 +196,6 @@ function renderWordBank() {
     });
 
     learnedWords.forEach(engWord => {
-        // Find the full word object to get the hebrew translation
         let w = allWords.find(x => x.eng === engWord);
         if(!w) return;
 
@@ -235,7 +243,6 @@ function loadSelectedText() {
     const index = document.getElementById('text-selector').value;
     const data = readingData[index];
     
-    // Inject Text
     const textBox = document.getElementById('reading-text-box');
     textBox.innerHTML = `<h3>${data.title}</h3>`;
     data.paragraphs.forEach(p => {
@@ -244,7 +251,6 @@ function loadSelectedText() {
         textBox.appendChild(pEl);
     });
 
-    // Inject Questions
     const container = document.getElementById('quiz-container');
     container.innerHTML = '';
 
@@ -295,61 +301,40 @@ function checkReadingAnswer(element, selectedIndex, correctIndex, optionsContain
 
 // --- Navigation ---
 function switchMainTab(mainTabId) {
-    // 1. צובע את הכפתור הראשי
     document.querySelectorAll('.main-nav button').forEach(b => b.classList.remove('active'));
     document.getElementById('main-btn-' + mainTabId).classList.add('active');
 
-    // 2. מעלים את כל תתי-התפריטים והמסכים
     document.querySelectorAll('.sub-nav').forEach(nav => nav.style.display = 'none');
     document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
 
-    // 3. מציג את תת התפריט הנכון
     const subNav = document.getElementById('sub-nav-' + mainTabId);
     if (subNav) subNav.style.display = 'flex';
 
-    // 4. מעביר למסך ברירת המחדל של כל קטגוריה
     if (mainTabId === 'words') switchSubTab('vocab');
     if (mainTabId === 'restate') switchSubTab('restate-container');
     if (mainTabId === 'exams') {
         switchSubTab('exams-container');
-        initExamTab(); // השורה שבודקת את המאגר
+        initExamTab();
     }
 }
 
 function switchSubTab(tabId) {
-    // מנקה צביעה מכל כפתורי תת-התפריט
     document.querySelectorAll('.sub-nav button').forEach(b => b.classList.remove('active'));
-    // מסתיר את כל המסכים
     document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
     
-    // מציג את המסך המבוקש וצובע את הכפתור שלו
     document.getElementById(tabId).classList.add('active');
     const btn = document.getElementById('btn-' + tabId);
     if(btn) btn.classList.add('active');
 }
 
-// Boot the app
 window.onload = initApp;
 
-// --- אפקט רקע דינמי שעוקב אחרי העכבר ---
 document.addEventListener('mousemove', (e) => {
     document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
     document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
 });
 
-
-// --- 5. Live AI Restatements Logic ---
-let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-let currentAiWordObj = null;
-
-function initAiTab() {
-    if (geminiApiKey) {
-        document.getElementById('gemini-api-key').value = geminiApiKey;
-        document.getElementById('api-key-section').style.display = 'none';
-        document.getElementById('ai-quiz-section').style.display = 'block';
-    }
-}
-
+// --- API & Live Generative Logic ---
 function saveApiKey() {
     const key = document.getElementById('gemini-api-key').value.trim();
     if (key) {
@@ -361,26 +346,19 @@ function saveApiKey() {
     }
 }
 
-// משתנה ששומר את המודל כדי לחסוך קריאות כפולות
-let workingGeminiModel = null;
-
 async function generateAISentence() {
-    if (!geminiApiKey) {
-        alert("חסר מפתח API.");
-        return;
-    }
+    if (!geminiApiKey) { alert("חסר מפתח API."); return; }
     
+    // מנקה סטטוס כדי שהמערכת תדע שזה AI ולא סטטי
+    window.lastQuestionType = null;
+    document.getElementById('ai-word-display').innerText = '';
+
     const validUnlearnedWords = unlearnedWords.filter(w => w.eng && w.eng.trim().length > 2);
-    
-    if (validUnlearnedWords.length === 0) {
-        alert("אין יותר מילים מתאימות לתרגול!");
-        return;
-    }
+    if (validUnlearnedWords.length === 0) { alert("אין יותר מילים מתאימות לתרגול!"); return; }
 
     currentAiWordObj = validUnlearnedWords[Math.floor(Math.random() * validUnlearnedWords.length)];
     const targetWord = currentAiWordObj.eng;
 
-    // UI Reset
     document.getElementById('ai-quiz-content').style.display = 'none';
     document.getElementById('generate-ai-btn').style.display = 'none';
     document.getElementById('ai-loading').style.display = 'block';
@@ -415,7 +393,6 @@ async function generateAISentence() {
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-        
         let response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -443,7 +420,6 @@ async function generateAISentence() {
 
         const result = JSON.parse(jsonText);
         
-        // שמירה למאגר AI
         savedAiSentences.push(result);
         localStorage.setItem('saved_ai_sentences', JSON.stringify(savedAiSentences));
         renderAiQuiz(result);
@@ -457,6 +433,23 @@ async function generateAISentence() {
     }
 }
 
+function loadStaticSentence() {
+    if (staticSentIndex >= staticSentences.length) {
+        alert("כל הכבוד! סיימת את כל השאלות במאגר. נסה לייצר שאלות חדשות ב-AI.");
+        return;
+    }
+    const q = staticSentences[staticSentIndex];
+    const formatted = {
+        sentence: q.sentence,
+        options: q.options.map(o => ({ word: o, translation: "" })),
+        correctWord: q.correctWord,
+        explanation: q.explanation
+    };
+    window.lastQuestionType = 'static-sent';
+    renderAiQuiz(formatted);
+    document.getElementById('ai-word-display').innerText = `מאגר מובנה - שאלה ${staticSentIndex + 1} מתוך ${staticSentences.length}`;
+}
+
 function renderAiQuiz(data) {
     document.getElementById('ai-quiz-content').style.display = 'block';
     document.getElementById('ai-sentence').innerText = data.sentence || data.Sentence;
@@ -464,8 +457,8 @@ function renderAiQuiz(data) {
     const optionsContainer = document.getElementById('ai-options');
     optionsContainer.innerHTML = '';
     optionsContainer.classList.remove('locked');
+    document.getElementById('ai-feedback').innerHTML = ''; // מנקה פידבק קודם
 
-    // שמירת ההסבר עם הגנה למקרה שג'מיני שינה את שם המפתח
     optionsContainer.dataset.explanation = data.explanation || data.Explanation || "לא סופק הסבר.";
 
     const optionsArray = data.options || data.Options || [];
@@ -474,12 +467,8 @@ function renderAiQuiz(data) {
     shuffledOptions.forEach(opt => {
         let btn = document.createElement('div');
         btn.className = 'mc-option';
-        
-        // שומרים את האנגלית והעברית בזיכרון של הכפתור
         btn.dataset.word = opt.word || opt.Word;
         btn.dataset.translation = opt.translation || opt.Translation || "אין תרגום";
-
-        // בהתחלה מציגים רק את המילה באנגלית
         btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${btn.dataset.word}</span>`;
         
         btn.onclick = () => checkAiAnswer(btn, btn.dataset.word, data.correctWord || data.CorrectWord, optionsContainer);
@@ -491,14 +480,15 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
     if (container.classList.contains('locked')) return;
     container.classList.add('locked');
 
-    // עוברים על כל הכפתורים: חושפים את התרגום וצובעים אותם
     Array.from(container.children).forEach(btn => {
         const word = btn.dataset.word;
         const trans = btn.dataset.translation;
         
-        // כאן קורה הקסם: הכפתור מתעדכן להראות את המילה + שורת רווח + התרגום
-        btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span><br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>`;
-        
+        // מציג תרגום רק אם זה AI
+        if (window.lastQuestionType !== 'static-sent') {
+            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span><br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>`;
+        }
+
         if (word === correctOpt) btn.classList.add('correct');
         if (word === selectedOptStr && selectedOptStr !== correctOpt) btn.classList.add('wrong');
     });
@@ -507,32 +497,37 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
     const explanation = container.dataset.explanation;
     
     if (selectedOptStr === correctOpt) {
-        feedback.innerHTML = `נכון מאוד! ✔️<br><br>
-        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-            <strong style="color: var(--secondary);">ההקשר:</strong> ${explanation}
-        </div>`;
+        feedback.innerHTML = `נכון מאוד! ✔️<br><br><div style="font-size: 1rem; color: var(--text-dark); margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">ההקשר:</strong> ${explanation}</div>`;
         feedback.style.color = "var(--success)";
         
-        if (currentAiWordObj) {
+        // התקדמות אוטומטית למאגר הסטטי
+        if (window.lastQuestionType === 'static-sent') {
+            setTimeout(() => {
+                advanceProgress();
+                loadStaticSentence();
+            }, 3000);
+        } else if (currentAiWordObj) {
             toggleWordStatus(currentAiWordObj.eng, true);
         }
     } else {
-        feedback.innerHTML = `טעות.<br><br>
-        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-            <strong style="color: var(--secondary);">למה זו התשובה?</strong> ${explanation}
-        </div>`;
+        feedback.innerHTML = `טעות.<br><br><div style="font-size: 1rem; color: var(--text-dark); margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">למה זו התשובה?</strong> ${explanation}</div>`;
         feedback.style.color = "var(--danger)";
+        
+        // התקדמות אוטומטית גם בטעות למאגר הסטטי
+        if (window.lastQuestionType === 'static-sent') {
+            setTimeout(() => {
+                advanceProgress();
+                loadStaticSentence();
+            }, 4500);
+        }
     }
 }
-// ==========================================
-// --- 6. Live AI Restatements Logic ---
-// ==========================================
 
+// --- Restatement Logic ---
 async function generateRestatement() {
-    if (!geminiApiKey) {
-        alert("חסר מפתח API. הכנס מפתח למעלה מימין ושמור.");
-        return;
-    }
+    if (!geminiApiKey) { alert("חסר מפתח API. הכנס מפתח למעלה מימין ושמור."); return; }
+
+    window.lastQuestionType = null; // מאפס מצב סטטי
 
     document.getElementById('restate-quiz-content').style.display = 'none';
     document.getElementById('generate-restate-btn').style.display = 'none';
@@ -568,7 +563,6 @@ async function generateRestatement() {
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-        
         let response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -596,7 +590,6 @@ async function generateRestatement() {
 
         const result = JSON.parse(jsonText);
         
-        // שמירה למאגר AI
         savedAiRestatements.push(result);
         localStorage.setItem('saved_ai_restatements', JSON.stringify(savedAiRestatements));
         renderRestatementQuiz(result);
@@ -610,6 +603,22 @@ async function generateRestatement() {
     }
 }
 
+function loadStaticRestatement() {
+    if (staticRestIndex >= staticRestatements.length) {
+        alert("סיימת את כל הניסוחים מחדש במאגר!");
+        return;
+    }
+    const q = staticRestatements[staticRestIndex];
+    const formatted = {
+        original: q.original,
+        options: q.options,
+        correctIndex: 0,
+        explanation: q.explanation
+    };
+    window.lastQuestionType = 'static-rest';
+    renderRestatementQuiz(formatted);
+}
+
 function renderRestatementQuiz(data) {
     document.getElementById('restate-quiz-content').style.display = 'block';
     document.getElementById('restate-original').innerText = data.original || data.Original;
@@ -617,25 +626,23 @@ function renderRestatementQuiz(data) {
     const optionsContainer = document.getElementById('restate-options');
     optionsContainer.innerHTML = '';
     optionsContainer.classList.remove('answered');
+    document.getElementById('restate-feedback').innerHTML = '';
     
     optionsContainer.dataset.explanation = data.explanation || data.Explanation || "לא סופק הסבר.";
 
     const optionsArray = data.options || data.Options || [];
     
-    // קסם הערבוב: בגלל שהגדרנו ל-AI שהתשובה הנכונה היא תמיד הראשונה, נשמור אותה בצד
-    const correctText = optionsArray[0];
+    // אם זו שאלה מהמאגר המקורי (שלא עורבב עדיין), נשמור את מיקום 0
+    let correctText = optionsArray[0];
 
-    // אלגוריתם ערבוב אגרסיבי (Fisher-Yates) - אין סיכוי שיפספס
     let shuffledOptions = [...optionsArray];
     for (let i = shuffledOptions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
     }
 
-    // בודקים איפה התשובה הנכונה התחבאה אחרי הערבוב
     const newCorrectIndex = shuffledOptions.indexOf(correctText);
 
-    // מייצרים את הכפתורים
     shuffledOptions.forEach((optText, index) => {
         let optElement = document.createElement('div');
         optElement.className = 'option';
@@ -658,18 +665,26 @@ function checkRestatementAnswer(element, selectedIndex, correctIndex, optionsCon
     const explanation = optionsContainer.dataset.explanation;
 
     if (selectedIndex === correctIndex) {
-        feedback.innerHTML = `מדויק! ✔️<br><br>
-        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-            <strong style="color: var(--secondary);">הסבר:</strong> ${explanation}
-        </div>`;
+        feedback.innerHTML = `מדויק! ✔️<br><br><div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">הסבר:</strong> ${explanation}</div>`;
         feedback.style.color = "var(--success)";
+        
+        if (window.lastQuestionType === 'static-rest') {
+            setTimeout(() => {
+                advanceProgress();
+                loadStaticRestatement();
+            }, 3500);
+        }
     } else {
         element.classList.add('wrong');
-        feedback.innerHTML = `פספסת.<br><br>
-        <div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
-            <strong style="color: var(--secondary);">למה התשובה הירוקה נכונה?</strong> ${explanation}
-        </div>`;
+        feedback.innerHTML = `פספסת.<br><br><div style="font-size: 1rem; color: var(--text-dark); font-weight: normal; margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">למה התשובה הירוקה נכונה?</strong> ${explanation}</div>`;
         feedback.style.color = "var(--danger)";
+        
+        if (window.lastQuestionType === 'static-rest') {
+            setTimeout(() => {
+                advanceProgress();
+                loadStaticRestatement();
+            }, 5000);
+        }
     }
 }
 
@@ -679,31 +694,17 @@ function exportAiBank() {
         sentences: savedAiSentences,
         restatements: savedAiRestatements
     };
-    
-    // מנקה את ה-Console ומדפיס בצורה נקייה להעתקה
     console.clear();
     console.log("// --- העתק את כל הבלוק הזה לקובץ data.js שלך ---");
     console.log("const aiGeneratedBank = " + JSON.stringify(exportData, null, 4) + ";");
-    
-    alert(`המאגר יוצא בהצלחה ל-Console (F12)!
-נשמרו עד כה:
-- ${savedAiSentences.length} שאלות השלמת משפטים.
-- ${savedAiRestatements.length} שאלות ניסוח מחדש.
-לחץ על כפתור ה-Copy ב-Console והדבק ב-data.js.`);
+    alert(`המאגר יוצא בהצלחה ל-Console (F12)!\nלחץ על כפתור ה-Copy שם והדבק.`);
 }
 
-// ==========================================
-// --- 7. Full Amirnet Simulation Engine ---
-// ==========================================
-
+// --- Full Amirnet Simulation Engine ---
 let examTimer;
 let examTimeLeft;
 let examState = {
-    parts: [],
-    currentPartIndex: 0,
-    currentQuestionIndex: 0,
-    correctAnswers: 0,
-    totalQuestions: 23
+    parts: [], currentPartIndex: 0, currentQuestionIndex: 0, correctAnswers: 0, totalQuestions: 23
 };
 
 function initExamTab() {
@@ -714,7 +715,6 @@ function initExamTab() {
 
 async function fetchGeminiData(promptText) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-    
     let response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -722,7 +722,6 @@ async function fetchGeminiData(promptText) {
     });
 
     if (response.status === 429 || response.status === 503) {
-        console.warn("השהייה יזומה כדי לא להיחסם בגוגל (5 שניות)...");
         await new Promise(r => setTimeout(r, 5000));
         response = await fetch(url, {
             method: 'POST',
@@ -735,62 +734,23 @@ async function fetchGeminiData(promptText) {
 
     const data = await response.json();
     let jsonText = data.candidates[0].content.parts[0].text;
-    
     const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     if (jsonMatch) jsonText = jsonMatch[0];
-    jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
-    
-    return JSON.parse(jsonText);
+    return JSON.parse(jsonText.replace(/,\s*([\]}])/g, '$1'));
 }
 
 async function generateFullExam() {
-    if (!geminiApiKey) {
-        alert("חסר מפתח API. הכנס אותו בבר העליון קודם.");
-        return;
-    }
+    if (!geminiApiKey) { alert("חסר מפתח API."); return; }
 
     document.getElementById('btn-generate-exam').style.display = 'none';
     document.getElementById('exam-loading').style.display = 'block';
 
-    const promptSentences = `You are an expert test writer for the Israeli Amirnet English exam. 
-    Generate a JSON array of 12 "Sentence Completion" questions (Upper-B2 / C1 level).
-    
-    RULES:
-    1. Sentences must be academic and natural (15-25 words).
-    2. The blank '___' must test a challenging word (e.g., 'dispute', 'mitigate', 'profound'). Do not use basic words.
-    3. The 3 distractors must be plausible academic words.
-    4. Format exactly as a raw JSON array:
-    [ { "sentence": "Academic sentence with a blank ___ .", "options": ["CorrectWord", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
-    
-    IMPORTANT: Generate exactly 12 objects. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
-
-    const promptRestates = `You are an expert test writer for the Israeli Amirnet English exam. 
-    Generate a JSON array of 6 "Restatement" questions (Upper-B2 / C1 level).
-    
-    RULES:
-    1. Original sentences must be academic and logical (18-25 words).
-    2. The CORRECT restatement must maintain the exact original meaning using different syntax.
-    3. Distractors must logically alter the meaning.
-    4. Format exactly as a raw JSON array:
-    [ { "original": "Academic original sentence.", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
-    
-    IMPORTANT: Generate exactly 6 objects. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
-
-    const promptReading = `You are an expert test writer for the Israeli Amirnet English exam. 
-    Generate a JSON object for a "Reading Comprehension" section.
-    
-    RULES:
-    1. Write a standard, university-level academic text (3 short paragraphs).
-    2. Generate 5 questions.
-    3. Format exactly as a raw JSON object:
-    { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ] }
-    
-    IMPORTANT: Generate exactly 5 questions. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
+    const promptSentences = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON array of 12 "Sentence Completion" questions (Upper-B2 / C1 level). RULES: 1. Sentences must be academic and natural (15-25 words). 2. The blank '___' must test a challenging word. 3. Format exactly as a raw JSON array: [ { "sentence": "...", "options": ["CorrectWord", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "..." } ] IMPORTANT: Generate exactly 12 objects. First option (index 0) MUST be the correct one.`;
+    const promptRestates = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON array of 6 "Restatement" questions (Upper-B2 / C1 level). RULES: 1. Original sentences must be academic and logical (18-25 words). 2. Format exactly as a raw JSON array: [ { "original": "...", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "..." } ] IMPORTANT: Generate exactly 6 objects. First option (index 0) MUST be the correct one.`;
+    const promptReading = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON object for a "Reading Comprehension" section. RULES: 1. Write a standard, university-level academic text (3 short paragraphs). 2. Generate 5 questions. 3. Format exactly as a raw JSON object: { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "..." } ] } IMPORTANT: First option (index 0) MUST be the correct one.`;
 
     try {
-        // התיקון: מריצים את הבקשות אחת אחרי השנייה (בטור) כדי לא לחטוף חסימה!
         const loadingProgress = document.getElementById('exam-loading-progress');
-        
         loadingProgress.innerText = "שלב 1/3: כותב שאלות השלמת משפטים...";
         const sentencesData = await fetchGeminiData(promptSentences);
         
@@ -808,15 +768,12 @@ async function generateFullExam() {
             { title: "פרק 5: ניסוח מחדש", time: 6 * 60, type: "restate", qs: restatesData.slice(3, 6) },
             { title: "פרק 6: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(8, 12) }
         ];
-
         examState.currentPartIndex = 0;
         examState.correctAnswers = 0;
         startExam();
-
     } catch (error) {
         console.error(error);
-        workingGeminiModel = null;
-        alert("הייתה בעיה בהרכבת המבחן (כנראה הגבלת קצב מגוגל). פשוט תן למערכת דקה מנוחה ונסה שוב.");
+        alert("הייתה בעיה בהרכבת המבחן. נסה שוב.");
         document.getElementById('btn-generate-exam').style.display = 'block';
         document.getElementById('exam-loading').style.display = 'none';
     }
@@ -832,21 +789,18 @@ function loadExamPart() {
     clearInterval(examTimer);
     examState.currentQuestionIndex = 0;
     const part = examState.parts[examState.currentPartIndex];
-    
     document.getElementById('exam-part-title').innerText = part.title;
     examTimeLeft = part.time;
     updateExamTimerDisplay();
-    
     examTimer = setInterval(() => {
         examTimeLeft--;
         updateExamTimerDisplay();
         if (examTimeLeft <= 0) {
             clearInterval(examTimer);
-            alert("⏳ נגמר הזמן לפרק זה! המערכת מעבירה אותך לפרק הבא.");
+            alert("⏳ נגמר הזמן לפרק זה! עובר לפרק הבא.");
             nextExamPart();
         }
     }, 1000);
-    
     renderExamQuestion();
 }
 
@@ -859,30 +813,21 @@ function updateExamTimerDisplay() {
 function renderExamQuestion() {
     const part = examState.parts[examState.currentPartIndex];
     const qContainer = document.getElementById('exam-question-area');
-    const nextBtn = document.getElementById('btn-exam-next');
-    
     qContainer.innerHTML = '';
     qContainer.classList.remove('answered');
-    nextBtn.style.display = 'none';
-    
+    document.getElementById('btn-exam-next').style.display = 'none';
     document.getElementById('exam-progress').innerText = `שאלה ${examState.currentQuestionIndex + 1} מתוך ${part.qs.length}`;
     
     const q = part.qs[examState.currentQuestionIndex];
-    
     let questionHtml = '';
     let rawOptions = q.options || q.Options || [];
-    // אנחנו תמיד מצפים שהתשובה הנכונה מה-AI תהיה במקום ה-0
     let correctText = rawOptions[0]; 
 
-    // הגדרות תצוגה לפי סוג הפרק
     if (part.type === 'sentence') {
         questionHtml = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
-    } 
-    else if (part.type === 'restate') {
-        questionHtml = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);">
-            <p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
-    }
-    else if (part.type === 'reading') {
+    } else if (part.type === 'restate') {
+        questionHtml = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);"><p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
+    } else if (part.type === 'reading') {
         let textHtml = `<div style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; direction: ltr; font-family: 'Georgia'; font-size: 1rem; border-left: 3px solid var(--secondary);">`;
         part.text.paragraphs.forEach(p => textHtml += `<p style="margin-top:0;">${p}</p>`);
         textHtml += `</div>`;
@@ -891,14 +836,12 @@ function renderExamQuestion() {
 
     qContainer.innerHTML = questionHtml;
 
-    // מערבבים את התשובות (Fisher-Yates Shuffle)
     let shuffledOptions = [...rawOptions];
     for (let i = shuffledOptions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
     }
 
-    // הדפסת הכפתורים לחלון
     const grid = document.createElement('div');
     grid.className = (part.type === 'sentence') ? 'mc-grid' : 'options';
     if (part.type !== 'sentence') {
@@ -908,7 +851,6 @@ function renderExamQuestion() {
     shuffledOptions.forEach(optText => {
         let btn = document.createElement('div');
         btn.className = (part.type === 'sentence') ? 'mc-option' : 'option';
-        
         if (part.type === 'sentence') {
             btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${optText}</span>`;
             btn.style.minHeight = '60px';
@@ -916,15 +858,12 @@ function renderExamQuestion() {
             btn.innerText = optText;
             btn.style.direction = 'ltr'; btn.style.textAlign = 'left'; btn.style.fontSize = '1.1rem';
         }
-        
         btn.dataset.val = optText;
         btn.onclick = () => handleExamClick(grid, btn, optText, correctText, q.explanation);
         grid.appendChild(btn);
     });
 
     qContainer.appendChild(grid);
-    
-    // קופסת פידבק נסתרת (תקפוץ אחרי מענה)
     const feedbackDiv = document.createElement('div');
     feedbackDiv.id = "exam-q-feedback";
     feedbackDiv.className = "feedback-box";
@@ -953,15 +892,12 @@ function handleExamClick(grid, selectedBtn, selectedText, correctText, explanati
         feedbackDiv.innerHTML = `טעות ❌ ${expText}`;
         feedbackDiv.style.color = "var(--danger)";
     }
-
     document.getElementById('btn-exam-next').style.display = 'inline-block';
 }
 
 function nextExamQuestion() {
-    const part = examState.parts[examState.currentPartIndex];
     examState.currentQuestionIndex++;
-    
-    if (examState.currentQuestionIndex >= part.qs.length) {
+    if (examState.currentQuestionIndex >= examState.parts[examState.currentPartIndex].qs.length) {
         nextExamPart();
     } else {
         renderExamQuestion();
@@ -981,76 +917,66 @@ function finishExam() {
     clearInterval(examTimer);
     document.getElementById('exam-active').style.display = 'none';
     document.getElementById('exam-results').style.display = 'block';
-    
-    // נוסחת חישוב ציון אמירנט (נע בין 50 ל-150)
     const rawScore = Math.round(50 + (examState.correctAnswers / examState.totalQuestions) * 100);
-    
     const scoreEl = document.getElementById('exam-final-score');
     scoreEl.innerText = rawScore;
-    
-    // צבע חיווי ציון
     if (rawScore >= 120) scoreEl.style.color = 'var(--success)';
     else if (rawScore >= 100) scoreEl.style.color = 'var(--warning)';
     else scoreEl.style.color = 'var(--danger)';
 }
 
-// ניהול התקדמות במאגר הסטטי
-let staticSentIndex = parseInt(localStorage.getItem('static_sent_index')) || 0;
-let staticRestIndex = parseInt(localStorage.getItem('static_rest_index')) || 0;
+// ==========================================
+// --- Navigation for Static Banks ---
+// ==========================================
 
-function updateBankUI() {
-    if (document.getElementById('static-sent-num')) 
-        document.getElementById('static-sent-num').innerText = staticSentIndex + 1;
-    if (document.getElementById('static-rest-num')) 
-        document.getElementById('static-rest-num').innerText = staticRestIndex + 1;
-}
-
-function loadStaticSentence() {
-    if (staticSentIndex >= staticSentences.length) {
-        alert("כל הכבוד! סיימת את כל השאלות במאגר. נסה לייצר שאלות חדשות ב-AI.");
-        return;
-    }
-    const q = staticSentences[staticSentIndex];
-    // עטיפה בפורמט שה-render הקיים מכיר
-    const formatted = {
-        sentence: q.sentence,
-        options: q.options.map(o => ({ word: o, translation: "" })),
-        correctWord: q.correctWord,
-        explanation: q.explanation
-    };
-    renderAiQuiz(formatted);
-    // סימון לשמירת התקדמות במענה נכון
-    window.lastQuestionType = 'static-sent';
-    updateBankUI();
-}
-
-function loadStaticRestatement() {
-    if (staticRestIndex >= staticRestatements.length) {
-        alert("סיימת את כל הניסוחים מחדש במאגר!");
-        return;
-    }
-    const q = staticRestatements[staticRestIndex];
-    const formatted = {
-        original: q.original,
-        options: q.options,
-        correctIndex: 0, // המקור תמיד ב-0 לפני הערבוב של ה-render
-        explanation: q.explanation
-    };
-    renderRestatementQuiz(formatted);
-    window.lastQuestionType = 'static-rest';
-    updateBankUI();
-}
-
-// עדכון פונקציות הבדיקה כדי שיקדמו את המאגר
-// (צריך להוסיף את השורות הבאות בתוך checkAiAnswer ו-checkRestatementAnswer כשהתשובה נכונה)
-function advanceProgress() {
-    if (window.lastQuestionType === 'static-sent') {
-        staticSentIndex++;
+function navigateStatic(type, direction) {
+    if (type === 'sent') {
+        staticSentIndex += direction;
+        // חוסם חריגה מהגבולות של המערך
+        if (staticSentIndex < 0) staticSentIndex = 0;
+        if (staticSentIndex >= staticSentences.length) staticSentIndex = staticSentences.length - 1;
+        
         localStorage.setItem('static_sent_index', staticSentIndex);
-    } else if (window.lastQuestionType === 'static-rest') {
-        staticRestIndex++;
+        loadStaticSentence();
+    } 
+    else if (type === 'rest') {
+        staticRestIndex += direction;
+        // חוסם חריגה מהגבולות של המערך
+        if (staticRestIndex < 0) staticRestIndex = 0;
+        if (staticRestIndex >= staticRestatements.length) staticRestIndex = staticRestatements.length - 1;
+        
         localStorage.setItem('static_rest_index', staticRestIndex);
+        loadStaticRestatement();
     }
-    window.lastQuestionType = null;
-    updateBankUI();
 }
+
+// דריסה (Override) של פונקציות הטעינה כדי שיציגו את כפתורי הניווט
+const originalLoadStaticSentence = loadStaticSentence;
+loadStaticSentence = function() {
+    originalLoadStaticSentence();
+    if(document.getElementById('static-sent-nav')) document.getElementById('static-sent-nav').style.display = 'flex';
+};
+
+const originalLoadStaticRestatement = loadStaticRestatement;
+loadStaticRestatement = function() {
+    originalLoadStaticRestatement();
+    if(document.getElementById('static-rest-nav')) document.getElementById('static-rest-nav').style.display = 'flex';
+};
+
+// הסתרת הכפתורים כשעוברים למצב AI חי
+const originalGenerateAISentence = generateAISentence;
+generateAISentence = async function() {
+    if(document.getElementById('static-sent-nav')) document.getElementById('static-sent-nav').style.display = 'none';
+    await originalGenerateAISentence();
+};
+
+const originalGenerateRestatement = generateRestatement;
+generateRestatement = async function() {
+    if(document.getElementById('static-rest-nav')) document.getElementById('static-rest-nav').style.display = 'none';
+    await originalGenerateRestatement();
+};
+
+// ביטול המעבר האוטומטי בפונקציות הבדיקה כדי שהשליטה תהיה רק ידנית
+window.advanceProgress = function() { 
+    // ריק בכוונה - מבטל את הטיימר המעצבן שהיה קודם
+};

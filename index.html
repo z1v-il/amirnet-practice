@@ -101,6 +101,10 @@
                 <p id="ai-sentence" style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia', serif; line-height: 1.6; color: var(--text-dark);"></p>
                 <div id="ai-options" class="mc-grid"></div>
                 <div id="ai-feedback" class="feedback-box"></div>
+                <div id="static-sent-nav" style="display: none; justify-content: space-between; margin-top: 20px;">
+                    <button class="btn-primary" onclick="navigateStatic('sent', -1)" style="padding: 8px 20px; background: #475569;">⬅️ הקודם</button>
+                    <button class="btn-primary" onclick="navigateStatic('sent', 1)" style="padding: 8px 20px; background: var(--secondary); color: #0f172a;">הבא ➡️</button>
+                </div>
             </div>
         </div>
     </div>
@@ -144,6 +148,10 @@
                 <div id="restate-options" class="options" style="gap: 15px;"></div>
                 
                 <div id="restate-feedback" class="feedback-box" style="margin-top: 25px;"></div>
+                <div id="static-rest-nav" style="display: none; justify-content: space-between; margin-top: 20px;">
+                    <button class="btn-primary" onclick="navigateStatic('rest', -1)" style="padding: 8px 20px; background: #475569;">⬅️ הקודם</button>
+                    <button class="btn-primary" onclick="navigateStatic('rest', 1)" style="padding: 8px 20px; background: var(--secondary); color: #0f172a;">הבא ➡️</button>
+                </div>
             </div>
         </div>
     </div>
