@@ -415,8 +415,6 @@ async function generateAISentence() {
     }`;
 
     try {
-        // רשימה מעודכנת אפריל 2026 היישר מהמסמכים של גוגל!
-        // מסודרת לפי כמות הבקשות החינמיות: מהגבוה ביותר (1500) לנמוך ביותר.
         const fallbackModels = [
             "gemini-1.5-flash",
             "gemini-1.5-flash-8b",
@@ -427,42 +425,38 @@ async function generateAISentence() {
 
         let response;
         let successfulModel = null;
-
-        // אם כבר מצאנו מודל שעובד קודם, נרוץ רק עליו כדי לחסוך זמן
-        const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
+        
+        // התיקון: שמים את המודל שעבד בראש התור, אבל שומרים את השאר לגיבוי!
+        let modelsToTry = fallbackModels;
+        if (workingGeminiModel) {
+            modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+        }
 
         for (const modelName of modelsToTry) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
             
             try {
-                console.log(`מנסה לדפוק בדלת של מודל: ${modelName}...`);
+                console.log(`מנסה את מודל: ${modelName}...`);
                 response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                 });
 
                 if (response.status === 503 || response.status === 429) {
-                    console.warn(`המודל ${modelName} עמוס, מחכה 2 שניות ומנסה שוב...`);
-                    await new Promise(r => setTimeout(r, 2000));
+                    console.warn(`המודל ${modelName} עמוס, מחכה 3 שניות ומנסה שוב...`);
+                    await new Promise(r => setTimeout(r, 3000));
                     response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }] }]
-                        })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                     });
                 }
 
                 if (response.ok) {
                     successfulModel = modelName;
                     workingGeminiModel = modelName; 
-                    console.log(`✅ בינגו! ננעל על המודל שעובד: ${successfulModel}`);
                     break; 
-                } else {
-                    console.warn(`❌ המודל ${modelName} לא ענה כמו שצריך (קוד ${response.status}). עובר לבא.`);
                 }
             } catch (e) {
                 console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
@@ -470,17 +464,22 @@ async function generateAISentence() {
         }
 
         if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים חסומים. חשוב: אם הרגע יצרת מפתח חדש, לפעמים לגוגל לוקח 3-5 דקות לאקטב אותו בשרתים שלהם. תן לזה רגע ונסה שוב.");
+            throw new Error("כל המודלים חסומים עקב עומס. המתנה של דקה תפתור את זה.");
         }
 
         const data = await response.json();
-        
         let jsonText = data.candidates[0].content.parts[0].text;
-        jsonText = jsonText.replace(/```json/g, "").replace(/```/g, "").trim();
         
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) jsonText = jsonMatch[0];
+        jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
+
         const result = JSON.parse(jsonText);
+        
+        // שמירה אוטומטית למאגר ה-AI
         savedAiSentences.push(result);
         localStorage.setItem('saved_ai_sentences', JSON.stringify(savedAiSentences));
+
         renderAiQuiz(result);
 
     } catch (error) {
@@ -786,9 +785,14 @@ function initExamTab() {
 }
 
 // פונקציית עזר לשליחת בקשה לג'מיני (מנקה ומחלצת JSON)
+// פונקציית עזר לשליחת בקשה לג'מיני
 async function fetchGeminiData(promptText) {
-    const fallbackModels = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash", "gemini-2.5-flash"];
-    const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
+    const fallbackModels = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    
+    let modelsToTry = fallbackModels;
+    if (workingGeminiModel) {
+        modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+    }
 
     for (const modelName of modelsToTry) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
@@ -800,7 +804,8 @@ async function fetchGeminiData(promptText) {
             });
 
             if (response.status === 503 || response.status === 429) {
-                await new Promise(r => setTimeout(r, 2000)); // המתנה בעומס
+                console.warn(`המודל ${modelName} עמוס, ממתין 4 שניות כדי למנוע חסימה...`);
+                await new Promise(r => setTimeout(r, 4000));
                 response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -813,7 +818,6 @@ async function fetchGeminiData(promptText) {
                 const data = await response.json();
                 let jsonText = data.candidates[0].content.parts[0].text;
                 
-                // פילטר ניקוי
                 const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
                 if (jsonMatch) jsonText = jsonMatch[0];
                 jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
@@ -821,29 +825,27 @@ async function fetchGeminiData(promptText) {
                 return JSON.parse(jsonText);
             }
         } catch (e) {
-            console.warn(`Skipping model ${modelName}...`);
+            console.warn(`מדלג על מודל ${modelName}...`);
         }
     }
-    throw new Error("קריסת שרת בגוגל, אנא נסה שוב.");
+    throw new Error("קריסת שרת בגוגל (כנראה הגבלת קצב). תן לזה דקה ונסה שוב.");
 }
 
 async function generateFullExam() {
     if (!geminiApiKey) {
-        alert("חסר מפתח API. הכנס אותו במסך השלמת המשפטים קודם.");
+        alert("חסר מפתח API. הכנס אותו בבר העליון קודם.");
         return;
     }
 
     document.getElementById('btn-generate-exam').style.display = 'none';
     document.getElementById('exam-loading').style.display = 'block';
 
-    // 3 פרומפטים שדורשים מה-AI להחזיר תמיד את התשובה הנכונה במיקום הראשון (0)
-    // 3 פרומפטים שדורשים מה-AI להחזיר תמיד את התשובה הנכונה במיקום הראשון (0)
     const promptSentences = `You are an expert test writer for the Israeli Amirnet English exam. 
     Generate a JSON array of 12 "Sentence Completion" questions (Upper-B2 / C1 level).
     
     RULES:
     1. Sentences must be academic and natural (15-25 words).
-    2. The blank '___' must test a challenging word (e.g., 'dispute', 'mitigate', 'profound'). Do not use basic words like 'rely', but do NOT use bizarre, overly complex words either. Find the authentic exam sweet spot.
+    2. The blank '___' must test a challenging word (e.g., 'dispute', 'mitigate', 'profound'). Do not use basic words.
     3. The 3 distractors must be plausible academic words.
     4. Format exactly as a raw JSON array:
     [ { "sentence": "Academic sentence with a blank ___ .", "options": ["CorrectWord", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
@@ -856,7 +858,7 @@ async function generateFullExam() {
     RULES:
     1. Original sentences must be academic and logical (18-25 words).
     2. The CORRECT restatement must maintain the exact original meaning using different syntax.
-    3. Distractors must logically alter the meaning (reverse cause/effect, omit key details, etc).
+    3. Distractors must logically alter the meaning.
     4. Format exactly as a raw JSON array:
     [ { "original": "Academic original sentence.", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
     
@@ -866,22 +868,26 @@ async function generateFullExam() {
     Generate a JSON object for a "Reading Comprehension" section.
     
     RULES:
-    1. Write a standard, university-level academic text (3 short paragraphs) about biology, history, or psychology. It should be informative and clear.
-    2. Generate 5 questions: main idea, specific details, and vocabulary in context.
+    1. Write a standard, university-level academic text (3 short paragraphs).
+    2. Generate 5 questions.
     3. Format exactly as a raw JSON object:
     { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ] }
     
     IMPORTANT: Generate exactly 5 questions. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
 
     try {
-        // מריצים את כל 3 הבקשות במקביל! (Parallel Execution)
-        const [sentencesData, restatesData, readingDataAI] = await Promise.all([
-            fetchGeminiData(promptSentences),
-            fetchGeminiData(promptRestates),
-            fetchGeminiData(promptReading)
-        ]);
+        // התיקון: מריצים את הבקשות אחת אחרי השנייה (בטור) כדי לא לחטוף חסימה!
+        const loadingProgress = document.getElementById('exam-loading-progress');
+        
+        loadingProgress.innerText = "שלב 1/3: כותב שאלות השלמת משפטים...";
+        const sentencesData = await fetchGeminiData(promptSentences);
+        
+        loadingProgress.innerText = "שלב 2/3: כותב שאלות ניסוח מחדש...";
+        const restatesData = await fetchGeminiData(promptRestates);
+        
+        loadingProgress.innerText = "שלב 3/3: כותב קטע קריאה אקדמי...";
+        const readingDataAI = await fetchGeminiData(promptReading);
 
-        // תפירת המבחן
         examState.parts = [
             { title: "פרק 1: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(0, 4) },
             { title: "פרק 2: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(4, 8) },
@@ -897,7 +903,8 @@ async function generateFullExam() {
 
     } catch (error) {
         console.error(error);
-        alert("תקלה ביצירת המבחן: " + error.message);
+        workingGeminiModel = null;
+        alert("הייתה בעיה בהרכבת המבחן (כנראה הגבלת קצב מגוגל). פשוט תן למערכת דקה מנוחה ונסה שוב.");
         document.getElementById('btn-generate-exam').style.display = 'block';
         document.getElementById('exam-loading').style.display = 'none';
     }
