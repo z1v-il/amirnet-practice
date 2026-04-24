@@ -1,3 +1,68 @@
+const staticSentences = [
+    {
+        "sentence": "The government introduced new regulations in an attempt to ___ the negative environmental impact of the factories.",
+        "options": ["mitigate", "aggravate", "fluctuate", "instigate"],
+        "correctWord": "mitigate",
+        "explanation": "ממשלה מנסה 'להפחית/למתן' (mitigate) השפעה שלילית."
+    },
+    {
+        "sentence": "Despite its initial popularity, the technology quickly became ___ due to the rapid advancement of newer, more efficient devices.",
+        "options": ["obsolete", "lucrative", "contemporary", "prevalent"],
+        "correctWord": "obsolete",
+        "explanation": "הטכנולוגיה הפכה ל'מיושנת/כבר לא בשימוש' (obsolete) בגלל התקדמות."
+    },
+    {
+        "sentence": "The CEO's statement was intentionally ___ , leaving both employees and investors unsure about the company's future direction.",
+        "options": ["ambiguous", "explicit", "resilient", "coherent"],
+        "correctWord": "ambiguous",
+        "explanation": "ההצהרה הייתה 'דו-משמעית/מעורפלת' (ambiguous), מה שהשאיר אותם בחוסר ודאות."
+    },
+    {
+        "sentence": "Following the financial scandal, the corporation's accounting practices came under intense public and legal ___ .",
+        "options": ["scrutiny", "consensus", "indifference", "autonomy"],
+        "correctWord": "scrutiny",
+        "explanation": "אחרי שערורייה כלכלית, החברה תחת 'בדיקה קפדנית/חקירה' (scrutiny)."
+    },
+    {
+        "sentence": "Many economists argue that a global recession is ___ unless drastic measures are taken immediately.",
+        "options": ["inevitable", "implausible", "arbitrary", "precarious"],
+        "correctWord": "inevitable",
+        "explanation": "מיתון עולמי הוא 'בלתי נמנע' (inevitable) אלא אם יינקטו צעדים."
+    },
+    {
+        "sentence": "The transition from traditional retail to online sales proved to be a highly ___ move for the business.",
+        "options": ["lucrative", "detrimental", "stagnant", "obsolete"],
+        "correctWord": "lucrative",
+        "explanation": "המעבר למכירות ברשת התברר כמהלך 'רווחי/משתלם' (lucrative)."
+    },
+    {
+        "sentence": "Instead of focusing on utopian ideals, the committee decided to adopt a more ___ approach to solve the housing crisis.",
+        "options": ["pragmatic", "dogmatic", "erratic", "superficial"],
+        "correctWord": "pragmatic",
+        "explanation": "במקום אידיאלים אוטופיים, אימצו גישה 'מעשית/פרגמטית' (pragmatic)."
+    },
+    {
+        "sentence": "Certain species of plants are remarkably ___ , capable of surviving in extreme temperatures and with very little water.",
+        "options": ["resilient", "vulnerable", "tedious", "arbitrary"],
+        "correctWord": "resilient",
+        "explanation": "צמחים שמסוגלים לשרוד בתנאים קשים הם 'חסונים/עמידים' (resilient)."
+    },
+    {
+        "sentence": "The lack of sleep can have a ___ effect on a student's cognitive abilities and overall academic performance.",
+        "options": ["detrimental", "beneficial", "lucrative", "profound"],
+        "correctWord": "detrimental",
+        "explanation": "לחוסר שינה יש השפעה 'מזיקה' (detrimental) על יכולות קוגניטיביות."
+    },
+    {
+        "sentence": "The discovery of penicillin had a ___ impact on modern medicine, saving millions of lives worldwide.",
+        "options": ["profound", "trivial", "redundant", "superficial"],
+        "correctWord": "profound",
+        "explanation": "לגילוי הפניצילין הייתה השפעה 'עמוקה/משמעותית' (profound) על הרפואה."
+    }
+];
+
+
+
 allWords = [    {
         "eng": "abacus",
         "heb": "חשבונייה"

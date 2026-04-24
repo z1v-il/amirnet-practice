@@ -6,7 +6,8 @@ let currentQuizWord = null;
 // --- AI Saved Bank ---
 let savedAiSentences = JSON.parse(localStorage.getItem('saved_ai_sentences')) || [];
 let savedAiRestatements = JSON.parse(localStorage.getItem('saved_ai_restatements')) || [];
-
+// --- Static Bank Progress ---
+let currentStaticSentenceIndex = parseInt(localStorage.getItem('static_sentence_index')) || 0;
 
 // --- Initialize App ---
 function initApp() {
@@ -993,4 +994,42 @@ function finishExam() {
     if (rawScore >= 120) scoreEl.style.color = 'var(--success)';
     else if (rawScore >= 100) scoreEl.style.color = 'var(--warning)';
     else scoreEl.style.color = 'var(--danger)';
+}
+
+
+function loadNextStaticSentence() {
+    // בודק אם סיימנו את המאגר
+    if (currentStaticSentenceIndex >= staticSentences.length) {
+        document.getElementById('ai-feedback').innerHTML = "🎉 סיימת את כל השאלות במאגר! ממתין לעדכון שאלות חדשות.";
+        return;
+    }
+
+    const q = staticSentences[currentStaticSentenceIndex];
+    
+    // מערבבים את התשובות
+    let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+    const correctText = q.correctWord;
+
+    // בונים אובייקט בפורמט שהפונקציה של המסך כבר מכירה (renderAiQuiz)
+    const formattedData = {
+        sentence: q.sentence,
+        options: shuffledOptions.map(opt => ({ word: opt, translation: "" })), // בלי תרגום בשביל הקושי
+        correctWord: correctText,
+        explanation: q.explanation
+    };
+
+    // מציגים למסך
+    renderAiQuiz(formattedData);
+
+    // מעדכנים את הכותרת שתראה התקדמות
+    const progressText = `שאלה ${currentStaticSentenceIndex + 1} מתוך ${staticSentences.length} (מאגר סטטי)`;
+    document.getElementById('ai-word-display').innerText = progressText;
+    document.getElementById('ai-word-display').style.fontSize = "1.2rem";
+}
+
+// פונקציה לשמירת ההתקדמות בלחיצה על התשובה הנכונה
+function advanceStaticProgress() {
+    currentStaticSentenceIndex++;
+    localStorage.setItem('static_sentence_index', currentStaticSentenceIndex);
+    setTimeout(loadNextStaticSentence, 2000); // טוען את השאלה הבאה אחרי 2 שניות
 }
