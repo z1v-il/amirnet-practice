@@ -387,22 +387,23 @@ async function generateAISentence() {
     document.getElementById('ai-loading').style.display = 'block';
     document.getElementById('ai-feedback').innerHTML = ''; 
 
-    const promptText = `You are an expert test writer for the Israeli Psychometric and Amirnet English exams. 
-    Generate a formal, academic English sentence to test the advanced word "${targetWord}". 
+    const promptText = `You are an expert test writer for the Israeli Amirnet English exam. 
+    Generate a realistic, academic "Sentence Completion" question to test the word "${targetWord}". 
     
-    CRITICAL BALANCE: The sentence MUST be of medium length (approximately 15 to 25 words) with a compound or complex structure. It should read like a proper excerpt from a university textbook or a high-level scientific/historical article (B2 level). Do NOT make it a short or simple sentence. Ensure there are clear logical context clues.
+    CRITICAL BALANCE: The sentence should be academic and natural (15-25 words), dealing with science, history, or psychology. It must have clear logical context clues, but do NOT make it overly bombastic or convoluted. Target a realistic Upper-B2/C1 level.
     
-    Provide 4 multiple-choice options: 1 correct option ("${targetWord}") and 3 advanced (C1 level) distractors.
+    Provide 4 multiple-choice options: 1 correct option ("${targetWord}") and 3 plausible distractors of similar difficulty.
     Write a VERY SHORT explanation IN HEBREW (max 15 words) pointing out the context clue.
     Translate all 4 options to Hebrew.
     
     CRITICAL JSON RULES: 
-    1. Return ONLY a raw JSON object. Do NOT wrap it in \`\`\`json tags.
-    2. NEVER use double quotes (") inside your text values! If you must quote a word, use single quotes (') only.
+    1. Return ONLY a valid JSON object. Do NOT wrap it in \`\`\`json tags.
+    2. ALL keys must be enclosed in double quotes.
+    3. NEVER use double quotes (") inside your text values! Use single quotes (') only.
     
     Format exactly like this:
     {
-        "sentence": "the sentence with ___", 
+        "sentence": "the academic but natural sentence with ___", 
         "options": [
             {"word": "option1", "translation": "תרגום"},
             {"word": "option2", "translation": "תרגום"},
@@ -574,30 +575,31 @@ async function generateRestatement() {
     document.getElementById('restate-loading').style.display = 'block';
     document.getElementById('restate-feedback').innerHTML = ''; 
 
-    const promptText = `You are an expert test writer for the Israeli Psychometric and Amirnet English exams. 
-    Generate a "Restatement" question at a solid B2 level (upper-intermediate). 
+    const promptText = `You are an expert test writer for the Israeli Amirnet English exam. 
+    Generate a realistic "Restatement" question (Upper-B2 / C1 level). 
     
     RULES:
-    1. Write a clear, realistic academic sentence (15-25 words) dealing with science, history, sociology, or psychology. DO NOT use overly obscure or archaic vocabulary.
+    1. Write a clear, academic original sentence (18-25 words). Make it challenging but natural, avoiding overly obscure archaic words. It should contain a logical structure (like cause/effect or contrast).
     2. Provide exactly 4 multiple-choice options.
-    3. The FIRST option in the array MUST be the CORRECT option (conveying the exact same logical meaning using different words). The next 3 must be INCORRECT logically flawed distractors.
-    4. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick.
+    3. The FIRST option MUST be the CORRECT option (conveying the exact same logical meaning using different words). 
+    4. The next 3 must be INCORRECT logically flawed distractors (e.g., reversing cause and effect, missing details).
+    5. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick.
     
     CRITICAL JSON RULES:
     1. Return ONLY a valid JSON object. No \`\`\`json tags.
-    2. ALL keys must be in double quotes ("original", "options", "explanation").
+    2. ALL keys must be in double quotes.
     3. NEVER use double quotes (") inside your text values! Use single quotes (') instead.
     
     Format exactly like this:
     {
-        "original": "The original sentence...",
+        "original": "The academic original sentence...",
         "options": [
             "The CORRECT option...",
             "Incorrect option 1...",
             "Incorrect option 2...",
             "Incorrect option 3..."
         ],
-        "explanation": "הסבר קצר בעברית שמסביר את הטריק"
+        "explanation": "הסבר קצר בעברית"
     }`;
 
     try {
@@ -824,20 +826,41 @@ async function generateFullExam() {
     document.getElementById('exam-loading').style.display = 'block';
 
     // 3 פרומפטים שדורשים מה-AI להחזיר תמיד את התשובה הנכונה במיקום הראשון (0)
-    const promptSentences = `Generate a JSON array of 12 "Sentence Completion" questions (B2 academic level).
-    Format exactly as a raw JSON array:
-    [ { "sentence": "Academic sentence with a blank ___ .", "options": ["CorrectOption", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
-    IMPORTANT: Generate exactly 12 objects. First option MUST be the correct one.`;
+    // 3 פרומפטים שדורשים מה-AI להחזיר תמיד את התשובה הנכונה במיקום הראשון (0)
+    const promptSentences = `You are an expert test writer for the Israeli Amirnet English exam. 
+    Generate a JSON array of 12 "Sentence Completion" questions (Upper-B2 / C1 level).
+    
+    RULES:
+    1. Sentences must be academic and natural (15-25 words).
+    2. The blank '___' must test a challenging word (e.g., 'dispute', 'mitigate', 'profound'). Do not use basic words like 'rely', but do NOT use bizarre, overly complex words either. Find the authentic exam sweet spot.
+    3. The 3 distractors must be plausible academic words.
+    4. Format exactly as a raw JSON array:
+    [ { "sentence": "Academic sentence with a blank ___ .", "options": ["CorrectWord", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
+    
+    IMPORTANT: Generate exactly 12 objects. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
 
-    const promptRestates = `Generate a JSON array of 6 "Restatement" questions (B2 academic level).
-    Format exactly as a raw JSON array:
-    [ { "original": "Complex academic sentence.", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
-    IMPORTANT: Generate exactly 6 objects. First option MUST be the correct one.`;
+    const promptRestates = `You are an expert test writer for the Israeli Amirnet English exam. 
+    Generate a JSON array of 6 "Restatement" questions (Upper-B2 / C1 level).
+    
+    RULES:
+    1. Original sentences must be academic and logical (18-25 words).
+    2. The CORRECT restatement must maintain the exact original meaning using different syntax.
+    3. Distractors must logically alter the meaning (reverse cause/effect, omit key details, etc).
+    4. Format exactly as a raw JSON array:
+    [ { "original": "Academic original sentence.", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
+    
+    IMPORTANT: Generate exactly 6 objects. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
 
-    const promptReading = `Generate a JSON object for an academic "Reading Comprehension" section (B2 level).
-    Format exactly as a raw JSON object:
-    { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ] }
-    IMPORTANT: Generate exactly 5 questions. First option MUST be the correct one.`;
+    const promptReading = `You are an expert test writer for the Israeli Amirnet English exam. 
+    Generate a JSON object for a "Reading Comprehension" section.
+    
+    RULES:
+    1. Write a standard, university-level academic text (3 short paragraphs) about biology, history, or psychology. It should be informative and clear.
+    2. Generate 5 questions: main idea, specific details, and vocabulary in context.
+    3. Format exactly as a raw JSON object:
+    { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ] }
+    
+    IMPORTANT: Generate exactly 5 questions. First option (index 0) MUST be the correct one. Return ONLY valid JSON.`;
 
     try {
         // מריצים את כל 3 הבקשות במקביל! (Parallel Execution)
