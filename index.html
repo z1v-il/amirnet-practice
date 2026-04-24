@@ -139,10 +139,37 @@
     </div>
 
     <div id="exams-container" class="container fade-in">
-        <h2>סימולציית אמירנט מלאה</h2>
-        <p style="text-align: center; color: var(--text-muted);">בקרוב: ייצור מבחן שלם הכולל השלמת משפטים, ניסוח מחדש והבנת הנקרא.</p>
+        <h2>סימולציית אמירנט מלאה ⏱️</h2>
+        
+        <div id="exam-setup" style="text-align: center; margin-top: 20px;">
+            <p style="font-size: 1.1rem; color: var(--text-muted);">הסימולציה מורכבת מ-6 פרקים (23 שאלות) וזמן כולל של 39 דקות.</p>
+            <div id="exam-status" style="margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; line-height: 1.5;"></div>
+            <button class="btn-primary" id="btn-start-exam" onclick="startExam()" style="width: 100%; font-size: 1.2rem; display: none;">התחל סימולציה!</button>
         </div>
 
+        <div id="exam-active" style="display: none;">
+            <div class="stats-bar" style="background: var(--card-bg); color: white; justify-content: space-between; border-color: var(--secondary);">
+                <div style="font-weight: bold; font-size: 1.2rem; color: var(--secondary);" id="exam-part-title">פרק 1: השלמת משפטים</div>
+                <div style="font-weight: bold; font-size: 1.2rem; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px;">⏱️ <span id="exam-timer" style="direction: ltr; display: inline-block;">04:00</span></div>
+            </div>
+            
+            <div id="exam-question-area" class="quiz-card" style="min-height: 250px;">
+                </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 20px; align-items: center;">
+                <span id="exam-progress" style="color: var(--text-muted); font-size: 1.1rem;">שאלה 1 מתוך 4</span>
+                <button class="btn-primary" id="btn-exam-next" onclick="nextExamQuestion()" style="display:none; padding: 8px 20px;">לשאלה הבאה ➔</button>
+            </div>
+        </div>
+
+        <div id="exam-results" style="display: none; text-align: center; padding: 30px;">
+            <h2>הסימולציה הסתיימה! 🎉</h2>
+            <h1 style="color: var(--secondary); font-size: 5rem; margin: 10px 0; text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);" id="exam-final-score">120</h1>
+            <p style="font-size: 1.3rem; color: var(--text-muted); margin-bottom: 30px;">ציון אמירנט משוער</p>
+            <button class="btn-primary" onclick="switchMainTab('words')">חזור לאימון מילים</button>
+        </div>
+    </div>
+    
     <div id="reading" class="container fade-in">
         <h2>הבנת הנקרא (10 טקסטים אקדמיים)</h2>
         <select id="text-selector" class="dropdown" onchange="loadSelectedText()"></select>

@@ -311,7 +311,10 @@ function switchMainTab(mainTabId) {
     // 4. מעביר למסך ברירת המחדל של כל קטגוריה
     if (mainTabId === 'words') switchSubTab('vocab');
     if (mainTabId === 'restate') switchSubTab('restate-container');
-    if (mainTabId === 'exams') switchSubTab('exams-container');
+    if (mainTabId === 'exams') {
+        switchSubTab('exams-container');
+        initExamTab(); // השורה שבודקת את המאגר
+    }
 }
 
 function switchSubTab(tabId) {
@@ -747,4 +750,219 @@ function exportAiBank() {
 - ${savedAiSentences.length} שאלות השלמת משפטים.
 - ${savedAiRestatements.length} שאלות ניסוח מחדש.
 לחץ על כפתור ה-Copy ב-Console והדבק ב-data.js.`);
+}
+
+// ==========================================
+// --- 7. Full Amirnet Simulation Engine ---
+// ==========================================
+
+let examTimer;
+let examTimeLeft;
+let examState = {
+    parts: [],
+    currentPartIndex: 0,
+    currentQuestionIndex: 0,
+    correctAnswers: 0,
+    totalQuestions: 23
+};
+
+function initExamTab() {
+    const statusDiv = document.getElementById('exam-status');
+    const startBtn = document.getElementById('btn-start-exam');
+    
+    document.getElementById('exam-setup').style.display = 'block';
+    document.getElementById('exam-active').style.display = 'none';
+    document.getElementById('exam-results').style.display = 'none';
+    
+    // הדרישה למבחן שלם
+    const neededSentences = 12;
+    const neededRestates = 6;
+    
+    const hasSentences = savedAiSentences.length;
+    const hasRestates = savedAiRestatements.length;
+    
+    if (hasSentences >= neededSentences && hasRestates >= neededRestates) {
+        statusDiv.innerHTML = `<span style="color: var(--success); font-size:1.2rem; font-weight:bold;">✅ המאגר מוכן!</span><br><br>המערכת הרכיבה עבורך סימולציה מהשאלות שייצרת בעבר וקטע קריאה מהמאגר.`;
+        startBtn.style.display = 'inline-block';
+    } else {
+        statusDiv.innerHTML = `<span style="color: var(--danger); font-size:1.2rem; font-weight:bold;">⚠️ חסרות שאלות במאגר AI</span><br><br>
+        כדי להרכיב סימולציה שלמה, המערכת דורשת:<br>
+        <strong>${hasSentences}/${neededSentences}</strong> השלמת משפטים<br>
+        <strong>${hasRestates}/${neededRestates}</strong> ניסוח מחדש<br>
+        <br><span style="color: var(--secondary);">עבור לטאבים של ה-AI, ייצר שאלות חדשות כדי לאסוף אותן למאגר, ואז חזור לכאן.</span>`;
+        startBtn.style.display = 'none';
+    }
+}
+
+function startExam() {
+    document.getElementById('exam-setup').style.display = 'none';
+    document.getElementById('exam-active').style.display = 'block';
+    
+    // מערבבים את המאגרים ושולפים את הכמות המדויקת
+    const shuffledSentences = [...savedAiSentences].sort(() => Math.random() - 0.5);
+    const shuffledRestates = [...savedAiRestatements].sort(() => Math.random() - 0.5);
+    const randomReading = readingData[Math.floor(Math.random() * readingData.length)];
+    
+    // בניית שלד המבחן (תואם אמירנט!)
+    examState.parts = [
+        { title: "פרק 1: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(0, 4) },
+        { title: "פרק 2: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(4, 8) },
+        { title: "פרק 3: הבנת הנקרא", time: 15 * 60, type: "reading", text: randomReading, qs: randomReading.questions },
+        { title: "פרק 4: ניסוח מחדש", time: 6 * 60, type: "restate", qs: shuffledRestates.slice(0, 3) },
+        { title: "פרק 5: ניסוח מחדש", time: 6 * 60, type: "restate", qs: shuffledRestates.slice(3, 6) },
+        { title: "פרק 6: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(8, 12) }
+    ];
+    
+    examState.currentPartIndex = 0;
+    examState.correctAnswers = 0;
+    loadExamPart();
+}
+
+function loadExamPart() {
+    clearInterval(examTimer);
+    examState.currentQuestionIndex = 0;
+    const part = examState.parts[examState.currentPartIndex];
+    
+    document.getElementById('exam-part-title').innerText = part.title;
+    examTimeLeft = part.time;
+    updateExamTimerDisplay();
+    
+    examTimer = setInterval(() => {
+        examTimeLeft--;
+        updateExamTimerDisplay();
+        if (examTimeLeft <= 0) {
+            clearInterval(examTimer);
+            alert("⏳ נגמר הזמן לפרק זה! המערכת מעבירה אותך לפרק הבא.");
+            nextExamPart();
+        }
+    }, 1000);
+    
+    renderExamQuestion();
+}
+
+function updateExamTimerDisplay() {
+    const m = String(Math.floor(examTimeLeft / 60)).padStart(2, '0');
+    const s = String(examTimeLeft % 60).padStart(2, '0');
+    document.getElementById('exam-timer').innerText = `${m}:${s}`;
+}
+
+function renderExamQuestion() {
+    const part = examState.parts[examState.currentPartIndex];
+    const qContainer = document.getElementById('exam-question-area');
+    const nextBtn = document.getElementById('btn-exam-next');
+    
+    qContainer.innerHTML = '';
+    qContainer.classList.remove('answered');
+    nextBtn.style.display = 'none';
+    
+    document.getElementById('exam-progress').innerText = `שאלה ${examState.currentQuestionIndex + 1} מתוך ${part.qs.length}`;
+    
+    const q = part.qs[examState.currentQuestionIndex];
+    let correctText = "";
+    let optionsToRender = [];
+
+    // הגדרות תצוגה לפי סוג השאלה
+    if (part.type === 'sentence') {
+        qContainer.innerHTML = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
+        optionsToRender = q.options || q.Options;
+        correctText = q.correctWord || q.CorrectWord;
+    } 
+    else if (part.type === 'restate') {
+        qContainer.innerHTML = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);">
+            <p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
+        const rawOptions = q.options || q.Options || [];
+        correctText = rawOptions[0]; // אנחנו יודעים שהתשובה הנכונה תמיד ב-0 לפני הערבוב
+        optionsToRender = [...rawOptions].sort(() => Math.random() - 0.5);
+    }
+    else if (part.type === 'reading') {
+        let textHtml = `<div style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; direction: ltr; font-family: 'Georgia'; font-size: 1rem; border-left: 3px solid var(--secondary);">`;
+        part.text.paragraphs.forEach(p => textHtml += `<p style="margin-top:0;">${p}</p>`);
+        textHtml += `</div>`;
+        qContainer.innerHTML = textHtml + `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question}</h4>`;
+        correctText = q.options[q.correctIndex];
+        optionsToRender = q.options;
+    }
+
+    // הדפסת הכפתורים
+    const grid = document.createElement('div');
+    grid.className = (part.type === 'sentence') ? 'mc-grid' : 'options';
+    if (part.type !== 'sentence') {
+        grid.style.display = 'flex'; grid.style.flexDirection = 'column'; grid.style.gap = '10px';
+    }
+
+    optionsToRender.forEach(opt => {
+        let btn = document.createElement('div');
+        btn.className = (part.type === 'sentence') ? 'mc-option' : 'option';
+        
+        let wordValue = "";
+        if (part.type === 'sentence') {
+            wordValue = opt.word || opt.Word || opt;
+            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${wordValue}</span>`;
+            btn.style.minHeight = '60px';
+        } else {
+            wordValue = opt;
+            btn.innerText = opt;
+            btn.style.direction = 'ltr'; btn.style.textAlign = 'left'; btn.style.fontSize = '1.1rem';
+        }
+        
+        btn.dataset.val = wordValue;
+        btn.onclick = () => handleExamClick(grid, btn, wordValue, correctText);
+        grid.appendChild(btn);
+    });
+
+    qContainer.appendChild(grid);
+}
+
+function handleExamClick(grid, selectedBtn, selectedText, correctText) {
+    if (grid.classList.contains('answered')) return;
+    grid.classList.add('answered');
+
+    Array.from(grid.children).forEach(child => {
+        let childText = child.dataset.val;
+        if (childText === correctText) child.classList.add('correct');
+        if (child === selectedBtn && selectedText !== correctText) child.classList.add('wrong');
+    });
+
+    if (selectedText === correctText) {
+        examState.correctAnswers++;
+    }
+    document.getElementById('btn-exam-next').style.display = 'inline-block';
+}
+
+function nextExamQuestion() {
+    const part = examState.parts[examState.currentPartIndex];
+    examState.currentQuestionIndex++;
+    
+    if (examState.currentQuestionIndex >= part.qs.length) {
+        nextExamPart();
+    } else {
+        renderExamQuestion();
+    }
+}
+
+function nextExamPart() {
+    examState.currentPartIndex++;
+    if (examState.currentPartIndex >= examState.parts.length) {
+        finishExam();
+    } else {
+        loadExamPart();
+    }
+}
+
+function finishExam() {
+    clearInterval(examTimer);
+    document.getElementById('exam-active').style.display = 'none';
+    document.getElementById('exam-results').style.display = 'block';
+    
+    // נוסחת חישוב ציון אמירנט (הערכה גסה: 50 עד 150)
+    // 50 + (אחוז הצלחה * 100)
+    const rawScore = Math.round(50 + (examState.correctAnswers / examState.totalQuestions) * 100);
+    
+    const scoreEl = document.getElementById('exam-final-score');
+    scoreEl.innerText = rawScore;
+    
+    // צבע לפי הציון
+    if (rawScore >= 120) scoreEl.style.color = 'var(--success)';
+    else if (rawScore >= 100) scoreEl.style.color = 'var(--warning)';
+    else scoreEl.style.color = 'var(--danger)';
 }
