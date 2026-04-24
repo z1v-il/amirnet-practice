@@ -568,14 +568,14 @@ async function generateRestatement() {
     document.getElementById('restate-feedback').innerHTML = ''; 
 
     const promptText = `You are an expert test writer for the Israeli Psychometric and Amirnet English exams. 
-    Generate a C1-level "Restatement" question. 
+    Generate a "Restatement" question at a solid B2 level (upper-intermediate). 
     
     RULES:
-    1. Write a complex, academic original sentence (20-30 words) with advanced vocabulary and a specific logical structure.
+    1. Write a clear, realistic academic sentence (15-25 words) dealing with science, history, sociology, or psychology. DO NOT use overly obscure, archaic, or unnecessarily convoluted vocabulary. Keep it accessible but challenging.
     2. Provide exactly 4 multiple-choice options.
-    3. The CORRECT option must convey the EXACT SAME meaning as the original sentence, but use completely DIFFERENT vocabulary and grammatical structure.
-    4. The 3 INCORRECT options must be plausible but logically flawed.
-    5. Write a short explanation IN HEBREW (max 20 words) explaining why the correct option is the only one that maintains the original meaning.
+    3. The CORRECT option must convey the EXACT SAME logical meaning as the original sentence, using different words and structure. 
+    4. The 3 INCORRECT options must be logically flawed (e.g., reversing cause and effect, missing a crucial detail, or changing the timeline) but the vocabulary should remain readable so the user is tested on reading comprehension, not just dictionary knowledge.
+    5. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick or the missing detail in the distractors.
     
     CRITICAL JSON RULES:
     1. Return ONLY a raw JSON object. Do NOT wrap it in \`\`\`json tags.
@@ -583,7 +583,7 @@ async function generateRestatement() {
     
     Format exactly like this:
     {
-        "original": "The original complex sentence...",
+        "original": "The original sentence...",
         "options": [
             "Option 1...",
             "Option 2...",
