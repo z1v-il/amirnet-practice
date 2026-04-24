@@ -415,57 +415,25 @@ async function generateAISentence() {
     }`;
 
     try {
-        const fallbackModels = [
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-8b",
-            "gemini-2.0-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-2.5-flash"
-        ];
-
-        let response;
-        let successfulModel = null;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
         
-        // התיקון: שמים את המודל שעבד בראש התור, אבל שומרים את השאר לגיבוי!
-        let modelsToTry = fallbackModels;
-        if (workingGeminiModel) {
-            modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        });
+
+        if (response.status === 429 || response.status === 503) {
+            console.warn("עומס קל בשרת, ממתין 5 שניות...");
+            await new Promise(r => setTimeout(r, 5000));
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
         }
 
-        for (const modelName of modelsToTry) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-            
-            try {
-                console.log(`מנסה את מודל: ${modelName}...`);
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                });
-
-                if (response.status === 503 || response.status === 429) {
-                    console.warn(`המודל ${modelName} עמוס, מחכה 3 שניות ומנסה שוב...`);
-                    await new Promise(r => setTimeout(r, 3000));
-                    response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                    });
-                }
-
-                if (response.ok) {
-                    successfulModel = modelName;
-                    workingGeminiModel = modelName; 
-                    break; 
-                }
-            } catch (e) {
-                console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
-            }
-        }
-
-        if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים חסומים עקב עומס. המתנה של דקה תפתור את זה.");
-        }
+        if (!response.ok) throw new Error("גוגל דחה את הבקשה. קוד: " + response.status);
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
@@ -476,15 +444,13 @@ async function generateAISentence() {
 
         const result = JSON.parse(jsonText);
         
-        // שמירה אוטומטית למאגר ה-AI
+        // שמירה למאגר AI
         savedAiSentences.push(result);
         localStorage.setItem('saved_ai_sentences', JSON.stringify(savedAiSentences));
-
         renderAiQuiz(result);
 
     } catch (error) {
-        console.error("שגיאה שנתפסה:", error);
-        workingGeminiModel = null; 
+        console.error(error);
         alert("תקלה מול ה-AI: " + error.message);
     } finally {
         document.getElementById('ai-loading').style.display = 'none';
@@ -602,60 +568,25 @@ async function generateRestatement() {
     }`;
 
     try {
-        const fallbackModels = [
-            "gemini-1.5-flash",
-            "gemini-1.5-flash-8b",
-            "gemini-2.0-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-2.5-flash"
-        ];
-
-        let response;
-        let successfulModel = null;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
         
-        // התיקון שלנו: שמים את המודל שעבד בראש התור, אבל לא מוחקים את האחרים!
-        let modelsToTry = fallbackModels;
-        if (workingGeminiModel) {
-            modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        });
+
+        if (response.status === 429 || response.status === 503) {
+            console.warn("עומס קל בשרת, ממתין 5 שניות...");
+            await new Promise(r => setTimeout(r, 5000));
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
         }
 
-        for (const modelName of modelsToTry) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-            try {
-                console.log(`מנסה את מודל: ${modelName}...`);
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                });
-
-                if (response.status === 503 || response.status === 429) {
-                    console.warn(`המודל ${modelName} עמוס, ממתין 3 שניות...`);
-                    await new Promise(r => setTimeout(r, 3000));
-                    response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                    });
-                }
-
-                if (response.ok) {
-                    successfulModel = modelName;
-                    workingGeminiModel = modelName; 
-                    console.log(`✅ ננעל על המודל: ${successfulModel}`);
-                    break; 
-                } else {
-                    const errText = await response.text();
-                    console.warn(`❌ המודל ${modelName} החזיר שגיאה ${response.status}: ${errText}`);
-                }
-            } catch (e) {
-                console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
-            }
-        }
-
-        if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים נכשלו. פתח Console (F12) לראות למה.");
-        }
+        if (!response.ok) throw new Error("גוגל דחה את הבקשה. קוד: " + response.status);
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
@@ -666,15 +597,13 @@ async function generateRestatement() {
 
         const result = JSON.parse(jsonText);
         
-        // שמירה למאגר האוטומטי
+        // שמירה למאגר AI
         savedAiRestatements.push(result);
         localStorage.setItem('saved_ai_restatements', JSON.stringify(savedAiRestatements));
-
         renderRestatementQuiz(result);
 
     } catch (error) {
         console.error(error);
-        workingGeminiModel = null; 
         alert("תקלה מול ה-AI: " + error.message);
     } finally {
         document.getElementById('restate-loading').style.display = 'none';
@@ -784,51 +713,35 @@ function initExamTab() {
     document.getElementById('exam-results').style.display = 'none';
 }
 
-// פונקציית עזר לשליחת בקשה לג'מיני (מנקה ומחלצת JSON)
-// פונקציית עזר לשליחת בקשה לג'מיני
 async function fetchGeminiData(promptText) {
-    const fallbackModels = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash-lite", "gemini-2.0-flash"];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
     
-    let modelsToTry = fallbackModels;
-    if (workingGeminiModel) {
-        modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+    let response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+    });
+
+    if (response.status === 429 || response.status === 503) {
+        console.warn("השהייה יזומה כדי לא להיחסם בגוגל (5 שניות)...");
+        await new Promise(r => setTimeout(r, 5000));
+        response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        });
     }
 
-    for (const modelName of modelsToTry) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-        try {
-            let response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-            });
+    if (!response.ok) throw new Error("שגיאת שרת. קוד: " + response.status);
 
-            if (response.status === 503 || response.status === 429) {
-                console.warn(`המודל ${modelName} עמוס, ממתין 4 שניות כדי למנוע חסימה...`);
-                await new Promise(r => setTimeout(r, 4000));
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                });
-            }
-
-            if (response.ok) {
-                workingGeminiModel = modelName;
-                const data = await response.json();
-                let jsonText = data.candidates[0].content.parts[0].text;
-                
-                const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-                if (jsonMatch) jsonText = jsonMatch[0];
-                jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
-                
-                return JSON.parse(jsonText);
-            }
-        } catch (e) {
-            console.warn(`מדלג על מודל ${modelName}...`);
-        }
-    }
-    throw new Error("קריסת שרת בגוגל (כנראה הגבלת קצב). תן לזה דקה ונסה שוב.");
+    const data = await response.json();
+    let jsonText = data.candidates[0].content.parts[0].text;
+    
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (jsonMatch) jsonText = jsonMatch[0];
+    jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
+    
+    return JSON.parse(jsonText);
 }
 
 async function generateFullExam() {
