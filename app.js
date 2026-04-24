@@ -3,6 +3,10 @@ let unlearnedWords = [];
 let learnedWords = [];
 let currentFlashcardWord = null;
 let currentQuizWord = null;
+// --- AI Saved Bank ---
+let savedAiSentences = JSON.parse(localStorage.getItem('saved_ai_sentences')) || [];
+let savedAiRestatements = JSON.parse(localStorage.getItem('saved_ai_restatements')) || [];
+
 
 // --- Initialize App ---
 function initApp() {
@@ -471,6 +475,8 @@ async function generateAISentence() {
         jsonText = jsonText.replace(/```json/g, "").replace(/```/g, "").trim();
         
         const result = JSON.parse(jsonText);
+        savedAiSentences.push(result);
+        localStorage.setItem('saved_ai_sentences', JSON.stringify(savedAiSentences));
         renderAiQuiz(result);
 
     } catch (error) {
@@ -646,6 +652,9 @@ async function generateRestatement() {
         jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
 
         const result = JSON.parse(jsonText);
+        // שמירה אוטומטית למאגר ה-AI
+        savedAiRestatements.push(result);
+        localStorage.setItem('saved_ai_restatements', JSON.stringify(savedAiRestatements));
         renderRestatementQuiz(result);
 
     } catch (error) {
@@ -719,4 +728,23 @@ function checkRestatementAnswer(element, selectedIndex, correctIndex, optionsCon
         </div>`;
         feedback.style.color = "var(--danger)";
     }
+}
+
+// --- Export AI Bank ---
+function exportAiBank() {
+    const exportData = {
+        sentences: savedAiSentences,
+        restatements: savedAiRestatements
+    };
+    
+    // מנקה את ה-Console ומדפיס בצורה נקייה להעתקה
+    console.clear();
+    console.log("// --- העתק את כל הבלוק הזה לקובץ data.js שלך ---");
+    console.log("const aiGeneratedBank = " + JSON.stringify(exportData, null, 4) + ";");
+    
+    alert(`המאגר יוצא בהצלחה ל-Console (F12)!
+נשמרו עד כה:
+- ${savedAiSentences.length} שאלות השלמת משפטים.
+- ${savedAiRestatements.length} שאלות ניסוח מחדש.
+לחץ על כפתור ה-Copy ב-Console והדבק ב-data.js.`);
 }
