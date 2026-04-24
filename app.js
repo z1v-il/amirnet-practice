@@ -613,20 +613,26 @@ async function generateRestatement() {
 
         let response;
         let successfulModel = null;
-        const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
+        
+        // התיקון שלנו: שמים את המודל שעבד בראש התור, אבל לא מוחקים את האחרים!
+        let modelsToTry = fallbackModels;
+        if (workingGeminiModel) {
+            modelsToTry = [workingGeminiModel, ...fallbackModels.filter(m => m !== workingGeminiModel)];
+        }
 
         for (const modelName of modelsToTry) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
             try {
+                console.log(`מנסה את מודל: ${modelName}...`);
                 response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                 });
 
-                // טיפול בעומסים
                 if (response.status === 503 || response.status === 429) {
-                    await new Promise(r => setTimeout(r, 2000));
+                    console.warn(`המודל ${modelName} עמוס, ממתין 3 שניות...`);
+                    await new Promise(r => setTimeout(r, 3000));
                     response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -637,29 +643,34 @@ async function generateRestatement() {
                 if (response.ok) {
                     successfulModel = modelName;
                     workingGeminiModel = modelName; 
+                    console.log(`✅ ננעל על המודל: ${successfulModel}`);
                     break; 
+                } else {
+                    const errText = await response.text();
+                    console.warn(`❌ המודל ${modelName} החזיר שגיאה ${response.status}: ${errText}`);
                 }
             } catch (e) {
-                console.warn(`Skipping model ${modelName}...`);
+                console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
             }
         }
 
         if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים נכשלו.");
+            throw new Error("כל המודלים נכשלו. פתח Console (F12) לראות למה.");
         }
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
         
-        // פילטר ניקוי JSON
         const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
         if (jsonMatch) jsonText = jsonMatch[0];
         jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
 
         const result = JSON.parse(jsonText);
-        // שמירה אוטומטית למאגר ה-AI
+        
+        // שמירה למאגר האוטומטי
         savedAiRestatements.push(result);
         localStorage.setItem('saved_ai_restatements', JSON.stringify(savedAiRestatements));
+
         renderRestatementQuiz(result);
 
     } catch (error) {
