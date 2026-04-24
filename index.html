@@ -143,10 +143,15 @@
         
         <div id="exam-setup" style="text-align: center; margin-top: 20px;">
             <p style="font-size: 1.1rem; color: var(--text-muted);">הסימולציה מורכבת מ-6 פרקים (23 שאלות) וזמן כולל של 39 דקות.</p>
-            <div id="exam-status" style="margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; line-height: 1.5;"></div>
-            <button class="btn-primary" id="btn-start-exam" onclick="startExam()" style="width: 100%; font-size: 1.2rem; display: none;">התחל סימולציה!</button>
+            
+            <button class="btn-primary" id="btn-generate-exam" onclick="generateFullExam()" style="width: 100%; font-size: 1.2rem; margin-top: 20px;">ייצר סימולציה מלאה ב-AI והתחל 🚀</button>
+            
+            <div id="exam-loading" style="display: none; margin-top: 30px;">
+                <div style="font-size: 1.3rem; color: var(--secondary); font-weight: bold; animation: pulse 1.5s infinite;">ה-AI בונה סימולציה מלאה... (זה ייקח 15-20 שניות)</div>
+                <div style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;" id="exam-loading-progress">שולח 3 בקשות במקביל: משפטים, ניסוחים, וקטע קריאה...</div>
+            </div>
         </div>
-
+        
         <div id="exam-active" style="display: none;">
             <div class="stats-bar" style="background: var(--card-bg); color: white; justify-content: space-between; border-color: var(--secondary);">
                 <div style="font-weight: bold; font-size: 1.2rem; color: var(--secondary);" id="exam-part-title">פרק 1: השלמת משפטים</div>
@@ -169,7 +174,7 @@
             <button class="btn-primary" onclick="switchMainTab('words')">חזור לאימון מילים</button>
         </div>
     </div>
-    
+
     <div id="reading" class="container fade-in">
         <h2>הבנת הנקרא (10 טקסטים אקדמיים)</h2>
         <select id="text-selector" class="dropdown" onchange="loadSelectedText()"></select>
