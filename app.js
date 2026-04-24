@@ -574,12 +574,14 @@ async function generateRestatement() {
     1. Write a clear, realistic academic sentence (15-25 words) dealing with science, history, sociology, or psychology. DO NOT use overly obscure, archaic, or unnecessarily convoluted vocabulary. Keep it accessible but challenging.
     2. Provide exactly 4 multiple-choice options.
     3. The CORRECT option must convey the EXACT SAME logical meaning as the original sentence, using different words and structure. 
-    4. The 3 INCORRECT options must be logically flawed (e.g., reversing cause and effect, missing a crucial detail, or changing the timeline) but the vocabulary should remain readable so the user is tested on reading comprehension, not just dictionary knowledge.
+    4. The 3 INCORRECT options must be logically flawed (e.g., reversing cause and effect, missing a crucial detail, or changing the timeline).
     5. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick or the missing detail in the distractors.
     
     CRITICAL JSON RULES:
-    1. Return ONLY a raw JSON object. Do NOT wrap it in \`\`\`json tags.
-    2. NEVER use double quotes (") inside your text values! Use single quotes (') instead.
+    1. Return ONLY a valid JSON object. 
+    2. ALL keys must be enclosed in double quotes (e.g., "original", "options").
+    3. NEVER use double quotes (") inside your text values! Use single quotes (') instead.
+    4. Do not include trailing commas.
     
     Format exactly like this:
     {
@@ -595,7 +597,6 @@ async function generateRestatement() {
     }`;
 
     try {
-        // המנגנון החכם: סורק את המודלים כדי לא לקבל שגיאות 400 או 404 מגוגל
         const fallbackModels = [
             "gemini-1.5-flash",
             "gemini-1.5-flash-8b",
@@ -606,8 +607,6 @@ async function generateRestatement() {
 
         let response;
         let successfulModel = null;
-        
-        // אם מצאנו כבר מודל שעובד בפעולה קודמת, נשתמש בו ישר
         const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
 
         for (const modelName of modelsToTry) {
@@ -638,10 +637,9 @@ async function generateRestatement() {
                 if (response.ok) {
                     successfulModel = modelName;
                     workingGeminiModel = modelName; 
-                    console.log(`✅ בינגו! ננעל על המודל: ${successfulModel}`);
+                    console.log(`✅ ננעל על המודל: ${successfulModel}`);
                     break; 
                 } else {
-                    // שואב את השגיאה המדויקת מגוגל כדי שנדע מה קרה
                     const errText = await response.text();
                     console.warn(`❌ המודל ${modelName} החזיר שגיאה ${response.status}: ${errText}`);
                 }
@@ -651,22 +649,29 @@ async function generateRestatement() {
         }
 
         if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים נכשלו. פתח Console (F12) כדי לראות את פירוט השגיאה המדויק משרתי גוגל.");
+            throw new Error("כל המודלים נכשלו. בדוק Console (F12).");
         }
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
         
-        // ניקוי עטיפות markdown כדי שה-JSON ייקרא כמו שצריך
-        jsonText = jsonText.replace(/```json/g, "").replace(/```/g, "").trim();
+        // --- פילטר הניקוי החדש שלנו ---
+        // 1. מוצא רק את הבלוק שמתחיל ב { ומסתיים ב }
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            jsonText = jsonMatch[0];
+        }
         
+        // 2. מנקה פסיקים מיותרים בסוף אובייקטים או מערכים (שגורמים לקריסה)
+        jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
+
         const result = JSON.parse(jsonText);
         renderRestatementQuiz(result);
 
     } catch (error) {
         console.error("שגיאה שנתפסה:", error);
-        workingGeminiModel = null; // איפוס כדי שיסרוק מחדש
-        alert("תקלה מול ה-AI: " + error.message);
+        workingGeminiModel = null; 
+        alert("תקלה מול ה-AI (הוא כנראה פישל בפורמט): " + error.message + "\n\nפשוט לחץ אישור ונסה לייצר שוב, זה מסתדר בפעם הבאה.");
     } finally {
         document.getElementById('restate-loading').style.display = 'none';
         document.getElementById('generate-restate-btn').style.display = 'inline-block';
