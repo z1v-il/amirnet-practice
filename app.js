@@ -550,7 +550,6 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         feedback.style.color = "var(--danger)";
     }
 }
-
 // ==========================================
 // --- 6. Live AI Restatements Logic ---
 // ==========================================
@@ -561,7 +560,6 @@ async function generateRestatement() {
         return;
     }
 
-    // איפוס הממשק לפני הבקשה
     document.getElementById('restate-quiz-content').style.display = 'none';
     document.getElementById('generate-restate-btn').style.display = 'none';
     document.getElementById('restate-loading').style.display = 'block';
@@ -571,28 +569,25 @@ async function generateRestatement() {
     Generate a "Restatement" question at a solid B2 level (upper-intermediate). 
     
     RULES:
-    1. Write a clear, realistic academic sentence (15-25 words) dealing with science, history, sociology, or psychology. DO NOT use overly obscure, archaic, or unnecessarily convoluted vocabulary. Keep it accessible but challenging.
+    1. Write a clear, realistic academic sentence (15-25 words) dealing with science, history, sociology, or psychology. DO NOT use overly obscure or archaic vocabulary.
     2. Provide exactly 4 multiple-choice options.
-    3. The CORRECT option must convey the EXACT SAME logical meaning as the original sentence, using different words and structure. 
-    4. The 3 INCORRECT options must be logically flawed (e.g., reversing cause and effect, missing a crucial detail, or changing the timeline).
-    5. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick or the missing detail in the distractors.
+    3. The FIRST option in the array MUST be the CORRECT option (conveying the exact same logical meaning using different words). The next 3 must be INCORRECT logically flawed distractors.
+    4. Write a short explanation IN HEBREW (max 20 words) explaining the logical trick.
     
     CRITICAL JSON RULES:
-    1. Return ONLY a valid JSON object. 
-    2. ALL keys must be enclosed in double quotes (e.g., "original", "options").
+    1. Return ONLY a valid JSON object. No \`\`\`json tags.
+    2. ALL keys must be in double quotes ("original", "options", "explanation").
     3. NEVER use double quotes (") inside your text values! Use single quotes (') instead.
-    4. Do not include trailing commas.
     
     Format exactly like this:
     {
         "original": "The original sentence...",
         "options": [
-            "Option 1...",
-            "Option 2...",
-            "Option 3...",
-            "Option 4..."
+            "The CORRECT option...",
+            "Incorrect option 1...",
+            "Incorrect option 2...",
+            "Incorrect option 3..."
         ],
-        "correctIndex": 0,
         "explanation": "הסבר קצר בעברית שמסביר את הטריק"
     }`;
 
@@ -611,67 +606,52 @@ async function generateRestatement() {
 
         for (const modelName of modelsToTry) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-            
             try {
-                console.log(`מנסה את מודל: ${modelName}...`);
                 response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                 });
 
+                // טיפול בעומסים
                 if (response.status === 503 || response.status === 429) {
-                    console.warn(`המודל ${modelName} עמוס, מחכה 2 שניות ומנסה שוב...`);
                     await new Promise(r => setTimeout(r, 2000));
                     response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: promptText }] }]
-                        })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
                     });
                 }
 
                 if (response.ok) {
                     successfulModel = modelName;
                     workingGeminiModel = modelName; 
-                    console.log(`✅ ננעל על המודל: ${successfulModel}`);
                     break; 
-                } else {
-                    const errText = await response.text();
-                    console.warn(`❌ המודל ${modelName} החזיר שגיאה ${response.status}: ${errText}`);
                 }
             } catch (e) {
-                console.warn(`שגיאת רשת מול המודל ${modelName}, מדלג...`);
+                console.warn(`Skipping model ${modelName}...`);
             }
         }
 
         if (!successfulModel || !response || !response.ok) {
-            throw new Error("כל המודלים נכשלו. בדוק Console (F12).");
+            throw new Error("כל המודלים נכשלו.");
         }
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
         
-        // --- פילטר הניקוי החדש שלנו ---
-        // 1. מוצא רק את הבלוק שמתחיל ב { ומסתיים ב }
+        // פילטר ניקוי JSON
         const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            jsonText = jsonMatch[0];
-        }
-        
-        // 2. מנקה פסיקים מיותרים בסוף אובייקטים או מערכים (שגורמים לקריסה)
+        if (jsonMatch) jsonText = jsonMatch[0];
         jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
 
         const result = JSON.parse(jsonText);
         renderRestatementQuiz(result);
 
     } catch (error) {
-        console.error("שגיאה שנתפסה:", error);
+        console.error(error);
         workingGeminiModel = null; 
-        alert("תקלה מול ה-AI (הוא כנראה פישל בפורמט): " + error.message + "\n\nפשוט לחץ אישור ונסה לייצר שוב, זה מסתדר בפעם הבאה.");
+        alert("תקלה מול ה-AI: " + error.message);
     } finally {
         document.getElementById('restate-loading').style.display = 'none';
         document.getElementById('generate-restate-btn').style.display = 'inline-block';
@@ -686,29 +666,30 @@ function renderRestatementQuiz(data) {
     optionsContainer.innerHTML = '';
     optionsContainer.classList.remove('answered');
     
-    // שמירת ההסבר
-    optionsContainer.dataset.explanation = data.explanation || "לא סופק הסבר.";
+    optionsContainer.dataset.explanation = data.explanation || data.Explanation || "לא סופק הסבר.";
 
     const optionsArray = data.options || data.Options || [];
-    const originalCorrectIndex = data.correctIndex !== undefined ? data.correctIndex : data.CorrectIndex;
     
-    // 1. שומרים בצד את הטקסט המדויק של התשובה הנכונה לפני שמערבבים
-    const correctText = optionsArray[originalCorrectIndex];
+    // קסם הערבוב: בגלל שהגדרנו ל-AI שהתשובה הנכונה היא תמיד הראשונה, נשמור אותה בצד
+    const correctText = optionsArray[0];
 
-    // 2. מערבבים את כל התשובות (שולפים אותן בסדר אקראי)
-    const shuffledOptions = [...optionsArray].sort(() => Math.random() - 0.5);
+    // אלגוריתם ערבוב אגרסיבי (Fisher-Yates) - אין סיכוי שיפספס
+    let shuffledOptions = [...optionsArray];
+    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+    }
 
-    // 3. מוצאים איפה התשובה הנכונה מתחבאת עכשיו אחרי הערבוב
+    // בודקים איפה התשובה הנכונה התחבאה אחרי הערבוב
     const newCorrectIndex = shuffledOptions.indexOf(correctText);
 
-    // 4. מייצרים את הכפתורים לפי הסדר המעורבב
+    // מייצרים את הכפתורים
     shuffledOptions.forEach((optText, index) => {
         let optElement = document.createElement('div');
         optElement.className = 'option';
         optElement.style.fontSize = '1.1rem';
         optElement.innerText = optText;
         
-        // שולחים לבדיקה את האינדקס המעורבב החדש
         optElement.onclick = () => checkRestatementAnswer(optElement, index, newCorrectIndex, optionsContainer);
         optionsContainer.appendChild(optElement);
     });
@@ -718,7 +699,6 @@ function checkRestatementAnswer(element, selectedIndex, correctIndex, optionsCon
     if (optionsContainer.classList.contains('answered')) return;
     optionsContainer.classList.add('answered');
     
-    // סימון התשובה הנכונה
     const allOptions = optionsContainer.children;
     allOptions[correctIndex].classList.add('correct');
 
