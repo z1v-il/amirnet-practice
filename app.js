@@ -767,54 +767,111 @@ let examState = {
 };
 
 function initExamTab() {
-    const statusDiv = document.getElementById('exam-status');
-    const startBtn = document.getElementById('btn-start-exam');
-    
     document.getElementById('exam-setup').style.display = 'block';
     document.getElementById('exam-active').style.display = 'none';
     document.getElementById('exam-results').style.display = 'none';
-    
-    // הדרישה למבחן שלם
-    const neededSentences = 12;
-    const neededRestates = 6;
-    
-    const hasSentences = savedAiSentences.length;
-    const hasRestates = savedAiRestatements.length;
-    
-    if (hasSentences >= neededSentences && hasRestates >= neededRestates) {
-        statusDiv.innerHTML = `<span style="color: var(--success); font-size:1.2rem; font-weight:bold;">✅ המאגר מוכן!</span><br><br>המערכת הרכיבה עבורך סימולציה מהשאלות שייצרת בעבר וקטע קריאה מהמאגר.`;
-        startBtn.style.display = 'inline-block';
-    } else {
-        statusDiv.innerHTML = `<span style="color: var(--danger); font-size:1.2rem; font-weight:bold;">⚠️ חסרות שאלות במאגר AI</span><br><br>
-        כדי להרכיב סימולציה שלמה, המערכת דורשת:<br>
-        <strong>${hasSentences}/${neededSentences}</strong> השלמת משפטים<br>
-        <strong>${hasRestates}/${neededRestates}</strong> ניסוח מחדש<br>
-        <br><span style="color: var(--secondary);">עבור לטאבים של ה-AI, ייצר שאלות חדשות כדי לאסוף אותן למאגר, ואז חזור לכאן.</span>`;
-        startBtn.style.display = 'none';
+}
+
+// פונקציית עזר לשליחת בקשה לג'מיני (מנקה ומחלצת JSON)
+async function fetchGeminiData(promptText) {
+    const fallbackModels = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash", "gemini-2.5-flash"];
+    const modelsToTry = workingGeminiModel ? [workingGeminiModel] : fallbackModels;
+
+    for (const modelName of modelsToTry) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
+        try {
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
+
+            if (response.status === 503 || response.status === 429) {
+                await new Promise(r => setTimeout(r, 2000)); // המתנה בעומס
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                });
+            }
+
+            if (response.ok) {
+                workingGeminiModel = modelName;
+                const data = await response.json();
+                let jsonText = data.candidates[0].content.parts[0].text;
+                
+                // פילטר ניקוי
+                const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+                if (jsonMatch) jsonText = jsonMatch[0];
+                jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
+                
+                return JSON.parse(jsonText);
+            }
+        } catch (e) {
+            console.warn(`Skipping model ${modelName}...`);
+        }
+    }
+    throw new Error("קריסת שרת בגוגל, אנא נסה שוב.");
+}
+
+async function generateFullExam() {
+    if (!geminiApiKey) {
+        alert("חסר מפתח API. הכנס אותו במסך השלמת המשפטים קודם.");
+        return;
+    }
+
+    document.getElementById('btn-generate-exam').style.display = 'none';
+    document.getElementById('exam-loading').style.display = 'block';
+
+    // 3 פרומפטים שדורשים מה-AI להחזיר תמיד את התשובה הנכונה במיקום הראשון (0)
+    const promptSentences = `Generate a JSON array of 12 "Sentence Completion" questions (B2 academic level).
+    Format exactly as a raw JSON array:
+    [ { "sentence": "Academic sentence with a blank ___ .", "options": ["CorrectOption", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
+    IMPORTANT: Generate exactly 12 objects. First option MUST be the correct one.`;
+
+    const promptRestates = `Generate a JSON array of 6 "Restatement" questions (B2 academic level).
+    Format exactly as a raw JSON array:
+    [ { "original": "Complex academic sentence.", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ]
+    IMPORTANT: Generate exactly 6 objects. First option MUST be the correct one.`;
+
+    const promptReading = `Generate a JSON object for an academic "Reading Comprehension" section (B2 level).
+    Format exactly as a raw JSON object:
+    { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "Short hebrew explanation" } ] }
+    IMPORTANT: Generate exactly 5 questions. First option MUST be the correct one.`;
+
+    try {
+        // מריצים את כל 3 הבקשות במקביל! (Parallel Execution)
+        const [sentencesData, restatesData, readingDataAI] = await Promise.all([
+            fetchGeminiData(promptSentences),
+            fetchGeminiData(promptRestates),
+            fetchGeminiData(promptReading)
+        ]);
+
+        // תפירת המבחן
+        examState.parts = [
+            { title: "פרק 1: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(0, 4) },
+            { title: "פרק 2: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(4, 8) },
+            { title: "פרק 3: הבנת הנקרא", time: 15 * 60, type: "reading", text: readingDataAI, qs: readingDataAI.questions },
+            { title: "פרק 4: ניסוח מחדש", time: 6 * 60, type: "restate", qs: restatesData.slice(0, 3) },
+            { title: "פרק 5: ניסוח מחדש", time: 6 * 60, type: "restate", qs: restatesData.slice(3, 6) },
+            { title: "פרק 6: השלמת משפטים", time: 4 * 60, type: "sentence", qs: sentencesData.slice(8, 12) }
+        ];
+
+        examState.currentPartIndex = 0;
+        examState.correctAnswers = 0;
+        startExam();
+
+    } catch (error) {
+        console.error(error);
+        alert("תקלה ביצירת המבחן: " + error.message);
+        document.getElementById('btn-generate-exam').style.display = 'block';
+        document.getElementById('exam-loading').style.display = 'none';
     }
 }
 
 function startExam() {
     document.getElementById('exam-setup').style.display = 'none';
     document.getElementById('exam-active').style.display = 'block';
-    
-    // מערבבים את המאגרים ושולפים את הכמות המדויקת
-    const shuffledSentences = [...savedAiSentences].sort(() => Math.random() - 0.5);
-    const shuffledRestates = [...savedAiRestatements].sort(() => Math.random() - 0.5);
-    const randomReading = readingData[Math.floor(Math.random() * readingData.length)];
-    
-    // בניית שלד המבחן (תואם אמירנט!)
-    examState.parts = [
-        { title: "פרק 1: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(0, 4) },
-        { title: "פרק 2: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(4, 8) },
-        { title: "פרק 3: הבנת הנקרא", time: 15 * 60, type: "reading", text: randomReading, qs: randomReading.questions },
-        { title: "פרק 4: ניסוח מחדש", time: 6 * 60, type: "restate", qs: shuffledRestates.slice(0, 3) },
-        { title: "פרק 5: ניסוח מחדש", time: 6 * 60, type: "restate", qs: shuffledRestates.slice(3, 6) },
-        { title: "פרק 6: השלמת משפטים", time: 4 * 60, type: "sentence", qs: shuffledSentences.slice(8, 12) }
-    ];
-    
-    examState.currentPartIndex = 0;
-    examState.correctAnswers = 0;
     loadExamPart();
 }
 
@@ -858,62 +915,71 @@ function renderExamQuestion() {
     document.getElementById('exam-progress').innerText = `שאלה ${examState.currentQuestionIndex + 1} מתוך ${part.qs.length}`;
     
     const q = part.qs[examState.currentQuestionIndex];
-    let correctText = "";
-    let optionsToRender = [];
+    
+    let questionHtml = '';
+    let rawOptions = q.options || q.Options || [];
+    // אנחנו תמיד מצפים שהתשובה הנכונה מה-AI תהיה במקום ה-0
+    let correctText = rawOptions[0]; 
 
-    // הגדרות תצוגה לפי סוג השאלה
+    // הגדרות תצוגה לפי סוג הפרק
     if (part.type === 'sentence') {
-        qContainer.innerHTML = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
-        optionsToRender = q.options || q.Options;
-        correctText = q.correctWord || q.CorrectWord;
+        questionHtml = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
     } 
     else if (part.type === 'restate') {
-        qContainer.innerHTML = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);">
+        questionHtml = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);">
             <p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
-        const rawOptions = q.options || q.Options || [];
-        correctText = rawOptions[0]; // אנחנו יודעים שהתשובה הנכונה תמיד ב-0 לפני הערבוב
-        optionsToRender = [...rawOptions].sort(() => Math.random() - 0.5);
     }
     else if (part.type === 'reading') {
         let textHtml = `<div style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; direction: ltr; font-family: 'Georgia'; font-size: 1rem; border-left: 3px solid var(--secondary);">`;
         part.text.paragraphs.forEach(p => textHtml += `<p style="margin-top:0;">${p}</p>`);
         textHtml += `</div>`;
-        qContainer.innerHTML = textHtml + `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question}</h4>`;
-        correctText = q.options[q.correctIndex];
-        optionsToRender = q.options;
+        questionHtml = textHtml + `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question || q.Question}</h4>`;
     }
 
-    // הדפסת הכפתורים
+    qContainer.innerHTML = questionHtml;
+
+    // מערבבים את התשובות (Fisher-Yates Shuffle)
+    let shuffledOptions = [...rawOptions];
+    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+    }
+
+    // הדפסת הכפתורים לחלון
     const grid = document.createElement('div');
     grid.className = (part.type === 'sentence') ? 'mc-grid' : 'options';
     if (part.type !== 'sentence') {
         grid.style.display = 'flex'; grid.style.flexDirection = 'column'; grid.style.gap = '10px';
     }
 
-    optionsToRender.forEach(opt => {
+    shuffledOptions.forEach(optText => {
         let btn = document.createElement('div');
         btn.className = (part.type === 'sentence') ? 'mc-option' : 'option';
         
-        let wordValue = "";
         if (part.type === 'sentence') {
-            wordValue = opt.word || opt.Word || opt;
-            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${wordValue}</span>`;
+            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${optText}</span>`;
             btn.style.minHeight = '60px';
         } else {
-            wordValue = opt;
-            btn.innerText = opt;
+            btn.innerText = optText;
             btn.style.direction = 'ltr'; btn.style.textAlign = 'left'; btn.style.fontSize = '1.1rem';
         }
         
-        btn.dataset.val = wordValue;
-        btn.onclick = () => handleExamClick(grid, btn, wordValue, correctText);
+        btn.dataset.val = optText;
+        btn.onclick = () => handleExamClick(grid, btn, optText, correctText, q.explanation);
         grid.appendChild(btn);
     });
 
     qContainer.appendChild(grid);
+    
+    // קופסת פידבק נסתרת (תקפוץ אחרי מענה)
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.id = "exam-q-feedback";
+    feedbackDiv.className = "feedback-box";
+    feedbackDiv.style.marginTop = "20px";
+    qContainer.appendChild(feedbackDiv);
 }
 
-function handleExamClick(grid, selectedBtn, selectedText, correctText) {
+function handleExamClick(grid, selectedBtn, selectedText, correctText, explanation) {
     if (grid.classList.contains('answered')) return;
     grid.classList.add('answered');
 
@@ -923,9 +989,18 @@ function handleExamClick(grid, selectedBtn, selectedText, correctText) {
         if (child === selectedBtn && selectedText !== correctText) child.classList.add('wrong');
     });
 
+    const feedbackDiv = document.getElementById('exam-q-feedback');
+    const expText = explanation ? `<br><span style="font-size:0.9rem; color:var(--text-muted); font-weight:normal;">${explanation}</span>` : '';
+
     if (selectedText === correctText) {
         examState.correctAnswers++;
+        feedbackDiv.innerHTML = `נכון! ✔️ ${expText}`;
+        feedbackDiv.style.color = "var(--success)";
+    } else {
+        feedbackDiv.innerHTML = `טעות ❌ ${expText}`;
+        feedbackDiv.style.color = "var(--danger)";
     }
+
     document.getElementById('btn-exam-next').style.display = 'inline-block';
 }
 
@@ -954,14 +1029,13 @@ function finishExam() {
     document.getElementById('exam-active').style.display = 'none';
     document.getElementById('exam-results').style.display = 'block';
     
-    // נוסחת חישוב ציון אמירנט (הערכה גסה: 50 עד 150)
-    // 50 + (אחוז הצלחה * 100)
+    // נוסחת חישוב ציון אמירנט (נע בין 50 ל-150)
     const rawScore = Math.round(50 + (examState.correctAnswers / examState.totalQuestions) * 100);
     
     const scoreEl = document.getElementById('exam-final-score');
     scoreEl.innerText = rawScore;
     
-    // צבע לפי הציון
+    // צבע חיווי ציון
     if (rawScore >= 120) scoreEl.style.color = 'var(--success)';
     else if (rawScore >= 100) scoreEl.style.color = 'var(--warning)';
     else scoreEl.style.color = 'var(--danger)';
