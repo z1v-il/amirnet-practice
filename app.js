@@ -686,19 +686,30 @@ function renderRestatementQuiz(data) {
     optionsContainer.innerHTML = '';
     optionsContainer.classList.remove('answered');
     
-    // שמירת ההסבר למקרה שהמשתמש יטעה או יצדק
+    // שמירת ההסבר
     optionsContainer.dataset.explanation = data.explanation || "לא סופק הסבר.";
 
     const optionsArray = data.options || data.Options || [];
-    const correctIndex = data.correctIndex !== undefined ? data.correctIndex : data.CorrectIndex;
+    const originalCorrectIndex = data.correctIndex !== undefined ? data.correctIndex : data.CorrectIndex;
+    
+    // 1. שומרים בצד את הטקסט המדויק של התשובה הנכונה לפני שמערבבים
+    const correctText = optionsArray[originalCorrectIndex];
 
-    optionsArray.forEach((optText, index) => {
+    // 2. מערבבים את כל התשובות (שולפים אותן בסדר אקראי)
+    const shuffledOptions = [...optionsArray].sort(() => Math.random() - 0.5);
+
+    // 3. מוצאים איפה התשובה הנכונה מתחבאת עכשיו אחרי הערבוב
+    const newCorrectIndex = shuffledOptions.indexOf(correctText);
+
+    // 4. מייצרים את הכפתורים לפי הסדר המעורבב
+    shuffledOptions.forEach((optText, index) => {
         let optElement = document.createElement('div');
         optElement.className = 'option';
         optElement.style.fontSize = '1.1rem';
         optElement.innerText = optText;
         
-        optElement.onclick = () => checkRestatementAnswer(optElement, index, correctIndex, optionsContainer);
+        // שולחים לבדיקה את האינדקס המעורבב החדש
+        optElement.onclick = () => checkRestatementAnswer(optElement, index, newCorrectIndex, optionsContainer);
         optionsContainer.appendChild(optElement);
     });
 }
