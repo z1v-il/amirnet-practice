@@ -33,7 +33,7 @@
     <nav class="sub-nav" id="sub-nav-words">
         <button id="btn-vocab" class="active" onclick="switchSubTab('vocab')">כרטיסיות</button>
         <button id="btn-quiz" onclick="switchSubTab('quiz')">מבחן אמריקאי</button>
-        <button id="btn-live-ai" onclick="switchSubTab('live-ai')">השלמת משפטים (AI)</button>
+        <button id="btn-live-ai" onclick="switchSubTab('live-ai')">השלמת משפטים</button>
         <button id="btn-bank" onclick="switchSubTab('bank')">ניהול מילים</button>
     </nav>
 
@@ -84,14 +84,20 @@
     </div>
 
     <div id="live-ai" class="container fade-in">
-        <h2>השלמת משפטים - AI בזמן אמת</h2>
+        <h2>השלמת משפטים (AI / מאגר)</h2>
         
         <div id="ai-quiz-section" style="text-align: center;">
-            <button class="btn-primary" id="generate-ai-btn" onclick="generateAISentence()" style="width: 100%; margin-bottom: 20px;">ייצר משפט אקדמי חדש 🤖</button>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn-primary" id="generate-ai-btn" onclick="generateAISentence()" style="flex: 1;">ייצר שאלה חדשה (AI) 🤖</button>
+                <button class="btn-primary" onclick="loadStaticSentence()" style="flex: 1; background: var(--secondary); color: #0f172a;">שאלה מהמאגר (#<span id="static-sent-num">1</span>) 📚</button>
+            </div>
             
             <div id="ai-loading" style="display: none;">ה-AI כותב משפט...</div>
             
             <div id="ai-quiz-content" class="quiz-card" style="display: none;">
+                <h3 id="ai-word-display" style="color: var(--text-muted); margin-bottom: 15px;"></h3>
+                
                 <p id="ai-sentence" style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia', serif; line-height: 1.6; color: var(--text-dark);"></p>
                 <div id="ai-options" class="mc-grid"></div>
                 <div id="ai-feedback" class="feedback-box"></div>
@@ -119,10 +125,14 @@
     </div>
 
     <div id="restate-container" class="container fade-in">
-        <h2>ניסוח מחדש (Restatements)</h2>
+        <h2>ניסוח מחדש (AI / מאגר)</h2>
         
         <div style="text-align: center; margin-top: 20px;">
-            <button class="btn-primary" id="generate-restate-btn" onclick="generateRestatement()" style="width: 100%; margin-bottom: 20px;">ייצר שאלת ניסוח מחדש 🤖</button>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn-primary" id="generate-restate-btn" onclick="generateRestatement()" style="flex: 1; background: #a855f7;">ייצר ניסוח מחדש (AI) 🤖</button>
+                <button class="btn-primary" onclick="loadStaticRestatement()" style="flex: 1; background: var(--secondary); color: #0f172a;">ניסוח מהמאגר (#<span id="static-rest-num">1</span>) 📚</button>
+            </div>
             
             <div id="restate-loading" style="display: none; font-size: 1.2rem; color: var(--secondary); font-weight: bold; animation: pulse 1.5s infinite; margin: 20px 0;">ה-AI מנסח שאלה אקדמית...</div>
             

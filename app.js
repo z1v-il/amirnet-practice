@@ -6,8 +6,6 @@ let currentQuizWord = null;
 // --- AI Saved Bank ---
 let savedAiSentences = JSON.parse(localStorage.getItem('saved_ai_sentences')) || [];
 let savedAiRestatements = JSON.parse(localStorage.getItem('saved_ai_restatements')) || [];
-// --- Static Bank Progress ---
-let currentStaticSentenceIndex = parseInt(localStorage.getItem('static_sentence_index')) || 0;
 
 // --- Initialize App ---
 function initApp() {
@@ -996,40 +994,63 @@ function finishExam() {
     else scoreEl.style.color = 'var(--danger)';
 }
 
+// ניהול התקדמות במאגר הסטטי
+let staticSentIndex = parseInt(localStorage.getItem('static_sent_index')) || 0;
+let staticRestIndex = parseInt(localStorage.getItem('static_rest_index')) || 0;
 
-function loadNextStaticSentence() {
-    // בודק אם סיימנו את המאגר
-    if (currentStaticSentenceIndex >= staticSentences.length) {
-        document.getElementById('ai-feedback').innerHTML = "🎉 סיימת את כל השאלות במאגר! ממתין לעדכון שאלות חדשות.";
-        return;
-    }
-
-    const q = staticSentences[currentStaticSentenceIndex];
-    
-    // מערבבים את התשובות
-    let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
-    const correctText = q.correctWord;
-
-    // בונים אובייקט בפורמט שהפונקציה של המסך כבר מכירה (renderAiQuiz)
-    const formattedData = {
-        sentence: q.sentence,
-        options: shuffledOptions.map(opt => ({ word: opt, translation: "" })), // בלי תרגום בשביל הקושי
-        correctWord: correctText,
-        explanation: q.explanation
-    };
-
-    // מציגים למסך
-    renderAiQuiz(formattedData);
-
-    // מעדכנים את הכותרת שתראה התקדמות
-    const progressText = `שאלה ${currentStaticSentenceIndex + 1} מתוך ${staticSentences.length} (מאגר סטטי)`;
-    document.getElementById('ai-word-display').innerText = progressText;
-    document.getElementById('ai-word-display').style.fontSize = "1.2rem";
+function updateBankUI() {
+    if (document.getElementById('static-sent-num')) 
+        document.getElementById('static-sent-num').innerText = staticSentIndex + 1;
+    if (document.getElementById('static-rest-num')) 
+        document.getElementById('static-rest-num').innerText = staticRestIndex + 1;
 }
 
-// פונקציה לשמירת ההתקדמות בלחיצה על התשובה הנכונה
-function advanceStaticProgress() {
-    currentStaticSentenceIndex++;
-    localStorage.setItem('static_sentence_index', currentStaticSentenceIndex);
-    setTimeout(loadNextStaticSentence, 2000); // טוען את השאלה הבאה אחרי 2 שניות
+function loadStaticSentence() {
+    if (staticSentIndex >= staticSentences.length) {
+        alert("כל הכבוד! סיימת את כל השאלות במאגר. נסה לייצר שאלות חדשות ב-AI.");
+        return;
+    }
+    const q = staticSentences[staticSentIndex];
+    // עטיפה בפורמט שה-render הקיים מכיר
+    const formatted = {
+        sentence: q.sentence,
+        options: q.options.map(o => ({ word: o, translation: "" })),
+        correctWord: q.correctWord,
+        explanation: q.explanation
+    };
+    renderAiQuiz(formatted);
+    // סימון לשמירת התקדמות במענה נכון
+    window.lastQuestionType = 'static-sent';
+    updateBankUI();
+}
+
+function loadStaticRestatement() {
+    if (staticRestIndex >= staticRestatements.length) {
+        alert("סיימת את כל הניסוחים מחדש במאגר!");
+        return;
+    }
+    const q = staticRestatements[staticRestIndex];
+    const formatted = {
+        original: q.original,
+        options: q.options,
+        correctIndex: 0, // המקור תמיד ב-0 לפני הערבוב של ה-render
+        explanation: q.explanation
+    };
+    renderRestatementQuiz(formatted);
+    window.lastQuestionType = 'static-rest';
+    updateBankUI();
+}
+
+// עדכון פונקציות הבדיקה כדי שיקדמו את המאגר
+// (צריך להוסיף את השורות הבאות בתוך checkAiAnswer ו-checkRestatementAnswer כשהתשובה נכונה)
+function advanceProgress() {
+    if (window.lastQuestionType === 'static-sent') {
+        staticSentIndex++;
+        localStorage.setItem('static_sent_index', staticSentIndex);
+    } else if (window.lastQuestionType === 'static-rest') {
+        staticRestIndex++;
+        localStorage.setItem('static_rest_index', staticRestIndex);
+    }
+    window.lastQuestionType = null;
+    updateBankUI();
 }

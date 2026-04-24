@@ -1,67 +1,35 @@
+// --- מאגר שאלות סטטי (נבנה על ידי ה-AI) ---
+
 const staticSentences = [
-    {
-        "sentence": "The government introduced new regulations in an attempt to ___ the negative environmental impact of the factories.",
-        "options": ["mitigate", "aggravate", "fluctuate", "instigate"],
-        "correctWord": "mitigate",
-        "explanation": "ממשלה מנסה 'להפחית/למתן' (mitigate) השפעה שלילית."
-    },
-    {
-        "sentence": "Despite its initial popularity, the technology quickly became ___ due to the rapid advancement of newer, more efficient devices.",
-        "options": ["obsolete", "lucrative", "contemporary", "prevalent"],
-        "correctWord": "obsolete",
-        "explanation": "הטכנולוגיה הפכה ל'מיושנת/כבר לא בשימוש' (obsolete) בגלל התקדמות."
-    },
-    {
-        "sentence": "The CEO's statement was intentionally ___ , leaving both employees and investors unsure about the company's future direction.",
-        "options": ["ambiguous", "explicit", "resilient", "coherent"],
-        "correctWord": "ambiguous",
-        "explanation": "ההצהרה הייתה 'דו-משמעית/מעורפלת' (ambiguous), מה שהשאיר אותם בחוסר ודאות."
-    },
-    {
-        "sentence": "Following the financial scandal, the corporation's accounting practices came under intense public and legal ___ .",
-        "options": ["scrutiny", "consensus", "indifference", "autonomy"],
-        "correctWord": "scrutiny",
-        "explanation": "אחרי שערורייה כלכלית, החברה תחת 'בדיקה קפדנית/חקירה' (scrutiny)."
-    },
-    {
-        "sentence": "Many economists argue that a global recession is ___ unless drastic measures are taken immediately.",
-        "options": ["inevitable", "implausible", "arbitrary", "precarious"],
-        "correctWord": "inevitable",
-        "explanation": "מיתון עולמי הוא 'בלתי נמנע' (inevitable) אלא אם יינקטו צעדים."
-    },
-    {
-        "sentence": "The transition from traditional retail to online sales proved to be a highly ___ move for the business.",
-        "options": ["lucrative", "detrimental", "stagnant", "obsolete"],
-        "correctWord": "lucrative",
-        "explanation": "המעבר למכירות ברשת התברר כמהלך 'רווחי/משתלם' (lucrative)."
-    },
-    {
-        "sentence": "Instead of focusing on utopian ideals, the committee decided to adopt a more ___ approach to solve the housing crisis.",
-        "options": ["pragmatic", "dogmatic", "erratic", "superficial"],
-        "correctWord": "pragmatic",
-        "explanation": "במקום אידיאלים אוטופיים, אימצו גישה 'מעשית/פרגמטית' (pragmatic)."
-    },
-    {
-        "sentence": "Certain species of plants are remarkably ___ , capable of surviving in extreme temperatures and with very little water.",
-        "options": ["resilient", "vulnerable", "tedious", "arbitrary"],
-        "correctWord": "resilient",
-        "explanation": "צמחים שמסוגלים לשרוד בתנאים קשים הם 'חסונים/עמידים' (resilient)."
-    },
-    {
-        "sentence": "The lack of sleep can have a ___ effect on a student's cognitive abilities and overall academic performance.",
-        "options": ["detrimental", "beneficial", "lucrative", "profound"],
-        "correctWord": "detrimental",
-        "explanation": "לחוסר שינה יש השפעה 'מזיקה' (detrimental) על יכולות קוגניטיביות."
-    },
-    {
-        "sentence": "The discovery of penicillin had a ___ impact on modern medicine, saving millions of lives worldwide.",
-        "options": ["profound", "trivial", "redundant", "superficial"],
-        "correctWord": "profound",
-        "explanation": "לגילוי הפניצילין הייתה השפעה 'עמוקה/משמעותית' (profound) על הרפואה."
-    }
+    { "sentence": "The candidate's victory was ___, as he won by a very small margin of only a few dozen votes.", "options": ["precarious", "overwhelming", "unanimous", "profound"], "correctWord": "precarious", "explanation": "ניצחון 'רעוע' (precarious) כי הוא הושג בהפרש קטן מאוד." },
+    { "sentence": "Scientists are working to ___ the effects of global warming by developing carbon-capture technologies.", "options": ["mitigate", "aggravate", "fluctuate", "instigate"], "correctWord": "mitigate", "explanation": "מנסים 'למתן/להפחית' (mitigate) את ההשפעות." },
+    { "sentence": "The ancient scrolls were so ___ that they had to be handled with extreme care to prevent them from crumbling.", "options": ["fragile", "resilient", "vibrant", "robust"], "correctWord": "fragile", "explanation": "המגילות היו 'שבירות/עדינות' (fragile) ולכן טיפלו בהן בזהירות." },
+    { "sentence": "The new law was designed to ___ corruption within the government and ensure transparency.", "options": ["curb", "promote", "neglect", "facilitate"], "correctWord": "curb", "explanation": "החוק נועד 'לרסן/לעצור' (curb) את השחיתות." },
+    { "sentence": "Her success is a ___ result of her hard work and dedication over many years.", "options": ["direct", "sporadic", "negligible", "ambiguous"], "correctWord": "direct", "explanation": "הצלחה היא תוצאה 'ישירה' (direct) של עבודה קשה." }
 ];
 
-
+const staticRestatements = [
+    {
+        "original": "Despite the harsh weather conditions, the hikers managed to reach the summit of the mountain on schedule.",
+        "options": [
+            "The hikers reached the top of the mountain on time even though the weather was very bad.",
+            "Because the weather was so bad, the hikers had to change their schedule to reach the summit.",
+            "The harsh weather made it impossible for the hikers to reach the summit as they had planned.",
+            "The hikers reached the summit earlier than expected because they ignored the weather conditions."
+        ],
+        "explanation": "המשפט מדגיש שהם הגיעו בזמן למרות (Despite) מזג האוויר."
+    },
+    {
+        "original": "The discovery of the new vaccine is likely to have a profound impact on public health worldwide.",
+        "options": [
+            "The new vaccine will probably significantly influence global public health.",
+            "Public health worldwide has already been improved by the discovery of the new vaccine.",
+            "The impact of the new vaccine on public health is expected to be trivial and temporary.",
+            "Scientists doubt that the new vaccine will have any effect on public health outside of certain areas."
+        ],
+        "explanation": "profound impact משמעותו השפעה עמוקה/משמעותית."
+    }
+];
 
 allWords = [    {
         "eng": "abacus",
