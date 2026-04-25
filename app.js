@@ -316,37 +316,57 @@ function saveApiKey() {
 // ==========================================
 // --- SMART API FETCHER (Exponential Backoff) ---
 // ==========================================
-async function fetchWithRetry(url, options, maxRetries = 3) {
-    for (let i = 0; i < maxRetries; i++) {
+// ==========================================
+// --- SMART API FETCHER (Multi-Model Fallback) ---
+// ==========================================
+const FALLBACK_MODELS = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-1.0-pro' // גיבוי אחרון למקרה שהכל קורס
+];
+
+async function fetchWithRetry(baseUrl, options) {
+    for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+        const currentModel = FALLBACK_MODELS[i];
+        
+        // מחליף את המודל המקורי ב-URL למודל הנוכחי בלולאה
+        const url = baseUrl.replace('gemini-2.0-flash', currentModel);
+        
         try {
             const response = await fetch(url, options);
             
             if (response.ok) {
-                return response; // הכל עבד פיקס
+                if (i > 0) console.log(`הצלחה עם מודל גיבוי: ${currentModel}`);
+                return response; 
             }
             
             if (response.status === 429 || response.status === 503) {
-                const waitTime = (i + 1) * 4000; // ממתין 4 שניות, ואז 8, ואז 12
-                console.warn(`שגיאת עומס (${response.status}). מנסה שוב בעוד ${waitTime/1000} שניות... (ניסיון ${i + 1} מתוך ${maxRetries})`);
+                console.warn(`מודל ${currentModel} חסום בגלל עומס (${response.status}).`);
                 
-                // חיפוש אלמנט טעינה פעיל כדי לעדכן את המשתמש
                 const loaders = ['ai-loading', 'restate-loading', 'exam-loading-progress'];
                 for (let id of loaders) {
                     const el = document.getElementById(id);
                     if (el && el.style.display !== 'none') {
-                        el.innerText = `גוגל חסמה זמנית. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
+                        el.innerText = `מודל עמוס. עובר למודל חלופי (${currentModel})... ⏳`;
                     }
                 }
                 
-                await new Promise(r => setTimeout(r, waitTime));
-                continue; // מריץ את הלולאה שוב
+                // אם נשארו עוד מודלים לנסות, ממשיך מיד לניסיון הבא בלי לחכות
+                if (i < FALLBACK_MODELS.length - 1) {
+                    continue;
+                } else {
+                    // אם זה היה המודל האחרון ברשימה
+                    throw new Error(`כל המודלים של גוגל חסומים כרגע עקב עומס בקשות (שגיאה ${response.status}).`);
+                }
             }
             
-            // שגיאות אחרות (למשל מפתח שגוי - 400) נזרוק מיד
+            // שגיאות אחרות (למשל מפתח לא תקין)
             throw new Error(`שגיאת שרת: ${response.status}`);
             
         } catch (error) {
-            if (i === maxRetries - 1) throw error; // זורק שגיאה רק אם זה הניסיון האחרון
+            // זורק את השגיאה החוצה רק אם סיימנו את כל רשימת המודלים וכלום לא עבד
+            if (i === FALLBACK_MODELS.length - 1) throw error; 
         }
     }
 }
