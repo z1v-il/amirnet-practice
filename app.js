@@ -510,9 +510,8 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         const word = btn.dataset.word;
         const trans = btn.dataset.translation;
         
-        // אם יש תרגום במאגר, מרנדרים אותו יפה מתחת למילה. אם לא, רק המילה נשארת.
-        const transHtml = trans ? `<br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>` : '';
-        btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span>${transHtml}`;
+        // עכשיו זה תמיד יציג תרגום (או את התרגום מה-AI, או מהמילון, או "חסר במילון")
+        btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span><br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>`;
 
         if (word === correctOpt) btn.classList.add('correct');
         if (word === selectedOptStr && selectedOptStr !== correctOpt) btn.classList.add('wrong');
@@ -618,26 +617,43 @@ async function generateRestatement() {
         document.getElementById('generate-restate-btn').style.display = 'inline-block';
     }
 }
-
-function loadStaticRestatement() {
-    if (staticRestIndex >= staticRestatements.length) {
-        alert("סיימת את כל הניסוחים מחדש במאגר!");
+function loadStaticSentence() {
+    if (staticSentIndex >= staticSentences.length) {
+        alert("כל הכבוד! סיימת את כל השאלות במאגר. נסה לייצר שאלות חדשות ב-AI.");
         return;
     }
-    const q = staticRestatements[staticRestIndex];
+    const q = staticSentences[staticSentIndex];
+    
+    // חיפוש במילון (לשאלות הישנות שכבר ייצרת)
+    const getHebrew = (engWord) => {
+        if (typeof allWords !== 'undefined') {
+            let match = allWords.find(w => w.eng.toLowerCase().trim() === engWord.toLowerCase().trim());
+            return match ? match.heb : "חסר במילון";
+        }
+        return "חסר במילון";
+    };
+
+    // מתאים את עצמו גם לפורמט הישן (מחרוזות) וגם לחדש (אובייקטים עם תרגום מובנה)
+    const mappedOptions = q.options.map(o => {
+        if (typeof o === 'object' && o.word) {
+            return { word: o.word, translation: o.translation || getHebrew(o.word) };
+        }
+        return { word: o, translation: getHebrew(o) };
+    });
+
     const formatted = {
-        original: q.original,
-        options: q.options,
-        correctIndex: 0,
+        sentence: q.sentence,
+        options: mappedOptions,
+        correctWord: q.correctWord,
         explanation: q.explanation
     };
-    window.lastQuestionType = 'static-rest';
-    renderRestatementQuiz(formatted);
     
-    // התיקון: מעדכן את הכותרת (שאלה X מתוך Y) בלייב!
-    const displayEl = document.getElementById('restate-word-display');
+    window.lastQuestionType = 'static-sent';
+    renderAiQuiz(formatted);
+    
+    const displayEl = document.getElementById('ai-word-display');
     if (displayEl) {
-        displayEl.innerText = `מאגר מובנה - שאלה ${staticRestIndex + 1} מתוך ${staticRestatements.length}`;
+        displayEl.innerText = `מאגר מובנה - שאלה ${staticSentIndex + 1} מתוך ${staticSentences.length}`;
     }
 }
 
