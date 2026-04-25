@@ -67,21 +67,29 @@ function advanceProgress() {
 }
 
 // --- 1. Flashcards Logic ---
+// --- 1. Flashcards Logic ---
 function loadRandomFlashcard() {
     if (unlearnedWords.length === 0) {
         document.getElementById('word-eng').innerText = "🏆";
         document.getElementById('word-heb').innerText = "סיימת הכל!";
         return;
     }
+    
     const card = document.getElementById('flashcard');
+    const isFlipped = card.classList.contains('is-flipped');
+    
+    // קודם כל מסובבים את הכרטיסייה חזרה לאנגלית
     card.classList.remove('is-flipped');
+    
+    // אם היא הייתה הפוכה, מחכים חצי שנייה שהיא תסתובב, אחרת מחליפים מיד
+    const delay = isFlipped ? 500 : 50;
     
     setTimeout(() => {
         const randomIndex = Math.floor(Math.random() * unlearnedWords.length);
         currentFlashcardWord = unlearnedWords[randomIndex];
         document.getElementById('word-eng').innerText = currentFlashcardWord.eng;
         document.getElementById('word-heb').innerText = currentFlashcardWord.heb;
-    }, 200);
+    }, delay);
 }
 
 function flipCard() {
