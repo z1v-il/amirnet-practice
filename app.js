@@ -500,26 +500,20 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         feedback.innerHTML = `נכון מאוד! ✔️<br><br><div style="font-size: 1rem; color: var(--text-dark); margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">ההקשר:</strong> ${explanation}</div>`;
         feedback.style.color = "var(--success)";
         
-        // התקדמות אוטומטית למאגר הסטטי
-        if (window.lastQuestionType === 'static-sent') {
-            setTimeout(() => {
-                advanceProgress();
-                loadStaticSentence();
-            }, 3000);
-        } else if (currentAiWordObj) {
-            toggleWordStatus(currentAiWordObj.eng, true);
+        // --- התיקון שלך: מעביר את המילה ל"יודע" גם אם זו שאלה מהמאגר! ---
+        if (!learnedWords.includes(correctOpt)) {
+            learnedWords.push(correctOpt);
+            unlearnedWords = unlearnedWords.filter(w => w.eng !== correctOpt);
+            
+            // שומר בזיכרון של הדפדפן ומעדכן את שאר המסכים
+            localStorage.setItem('amirnet_learned_words', JSON.stringify(learnedWords));
+            updateStats();
+            renderWordBank();
         }
+
     } else {
         feedback.innerHTML = `טעות.<br><br><div style="font-size: 1rem; color: var(--text-dark); margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">למה זו התשובה?</strong> ${explanation}</div>`;
         feedback.style.color = "var(--danger)";
-        
-        // התקדמות אוטומטית גם בטעות למאגר הסטטי
-        if (window.lastQuestionType === 'static-sent') {
-            setTimeout(() => {
-                advanceProgress();
-                loadStaticSentence();
-            }, 4500);
-        }
     }
 }
 
