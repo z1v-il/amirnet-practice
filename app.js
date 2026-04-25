@@ -386,7 +386,9 @@ function loadStaticSentence() {
         return;
     }
 
+    // חסין לקריסות במקרה של אותיות ריקות או שגיאות הקלדה
     const getHebrew = (engWord) => {
+        if (!engWord || typeof engWord !== 'string') return "חסר במילון";
         if (typeof allWords !== 'undefined') {
             let match = allWords.find(w => w.eng.toLowerCase().trim() === engWord.toLowerCase().trim());
             return match ? match.heb : "חסר במילון";
@@ -394,24 +396,27 @@ function loadStaticSentence() {
         return "חסר במילון";
     };
 
+    // מתקן שגיאות JSON של ה-AI אם הוא מחזיר Word במקום word
     const mappedOptions = q.options.map(o => {
-        if (typeof o === 'object' && o.word) {
-            return { word: o.word, translation: o.translation || getHebrew(o.word) };
+        if (typeof o === 'object' && o !== null) {
+            let w = o.word || o.Word;
+            let t = o.translation || o.Translation;
+            return { word: w, translation: t || getHebrew(w) };
         }
         return { word: o, translation: getHebrew(o) };
     });
 
-    let correctStr = q.correctWord;
+    let correctStr = q.correctWord || q.CorrectWord;
     if (!correctStr && q.correctIndex !== undefined) {
         let correctOpt = q.options[q.correctIndex];
-        correctStr = typeof correctOpt === 'object' ? correctOpt.word : correctOpt;
+        correctStr = typeof correctOpt === 'object' ? (correctOpt.word || correctOpt.Word) : correctOpt;
     }
 
     const formatted = {
-        sentence: q.sentence,
+        sentence: q.sentence || q.Sentence,
         options: mappedOptions,
         correctWord: correctStr,
-        explanation: q.explanation
+        explanation: q.explanation || q.Explanation
     };
     
     window.lastQuestionType = 'static-sent';
@@ -439,8 +444,16 @@ function renderAiQuiz(data) {
     shuffledOptions.forEach(opt => {
         let btn = document.createElement('div');
         btn.className = 'mc-option';
-        btn.dataset.word = opt.word || opt.Word;
-        btn.dataset.translation = opt.translation || opt.Translation || ""; 
+        
+        // חסין למקרה שזה מגיע כמחרוזת
+        if (typeof opt === 'string') {
+            btn.dataset.word = opt;
+            btn.dataset.translation = "חסר במילון";
+        } else {
+            btn.dataset.word = opt.word || opt.Word;
+            btn.dataset.translation = opt.translation || opt.Translation || ""; 
+        }
+        
         btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${btn.dataset.word}</span>`;
         btn.onclick = () => checkAiAnswer(btn, btn.dataset.word, data.correctWord || data.CorrectWord, optionsContainer);
         optionsContainer.appendChild(btn);
@@ -543,10 +556,10 @@ function loadStaticRestatement() {
     }
     const q = staticRestatements[staticRestIndex];
     const formatted = {
-        original: q.original,
-        options: q.options,
-        correctIndex: 0,
-        explanation: q.explanation
+        original: q.original || q.Original,
+        options: q.options || q.Options,
+        correctIndex: q.correctIndex !== undefined ? q.correctIndex : 0,
+        explanation: q.explanation || q.Explanation
     };
     window.lastQuestionType = 'static-rest';
     renderRestatementQuiz(formatted);
@@ -568,7 +581,7 @@ function renderRestatementQuiz(data) {
     
     optionsContainer.dataset.explanation = data.explanation || data.Explanation || "לא סופק הסבר.";
     const optionsArray = data.options || data.Options || [];
-    let correctText = optionsArray[0];
+    let correctText = optionsArray[data.correctIndex !== undefined ? data.correctIndex : 0];
 
     let shuffledOptions = [...optionsArray];
     for (let i = shuffledOptions.length - 1; i > 0; i--) {
