@@ -952,17 +952,19 @@ function navigateStatic(type, direction) {
     }
 }
 
-// דריסה (Override) של פונקציות הטעינה כדי שיציגו את כפתורי הניווט
+// דריסה (Override) של פונקציות הטעינה כדי שיציגו את כפתורי הניווט ויעדכנו מספרים
 const originalLoadStaticSentence = loadStaticSentence;
 loadStaticSentence = function() {
     originalLoadStaticSentence();
     if(document.getElementById('static-sent-nav')) document.getElementById('static-sent-nav').style.display = 'flex';
+    updateBankUI(); // התיקון: מעדכן את המספר על הכפתור הראשי!
 };
 
 const originalLoadStaticRestatement = loadStaticRestatement;
 loadStaticRestatement = function() {
     originalLoadStaticRestatement();
     if(document.getElementById('static-rest-nav')) document.getElementById('static-rest-nav').style.display = 'flex';
+    updateBankUI(); // התיקון: מעדכן את המספר על הכפתור הראשי!
 };
 
 // הסתרת הכפתורים כשעוברים למצב AI חי
