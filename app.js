@@ -315,8 +315,13 @@ function saveApiKey() {
 // ==========================================
 // --- SMART API FETCHER (Ultimate Fallback) ---
 // ==========================================
+// ==========================================
+// --- SMART API FETCHER (Ultimate Multi-Model Fallback) ---
+// ==========================================
 const FALLBACK_MODELS = [
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
     'gemini-1.5-flash',
     'gemini-1.5-pro'
 ];
@@ -325,12 +330,19 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
     for (let cycle = 0; cycle < maxCycles; cycle++) {
         for (let i = 0; i < FALLBACK_MODELS.length; i++) {
             const currentModel = FALLBACK_MODELS[i];
-            const url = baseUrl.replace('gemini-2.0-flash', currentModel);
+            
+            // מחליף את המודל בכתובת למודל הנוכחי בלולאה
+            let url = baseUrl;
+            if (url.includes('gemini-2.0-flash')) {
+                url = url.replace('gemini-2.0-flash', currentModel);
+            } else if (url.includes('gemini-2.5-flash')) {
+                url = url.replace('gemini-2.5-flash', currentModel);
+            }
             
             try {
                 const response = await fetch(url, options);
                 if (response.ok) {
-                    if (cycle > 0 || i > 0) console.log(`הצלחה עם מודל: ${currentModel}`);
+                    console.log(`✅ הצלחה עם מודל: ${currentModel}`);
                     return response; 
                 }
                 if (response.status === 404) {
@@ -338,7 +350,7 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
                     continue; 
                 }
                 if (response.status === 429 || response.status === 503) {
-                    console.warn(`מודל ${currentModel} עמוס (${response.status}).`);
+                    console.warn(`מודל ${currentModel} חסום או עמוס יומית/דקתית (${response.status}). עובר למודל הבא...`);
                     continue; 
                 }
                 if (response.status === 400) {
@@ -360,16 +372,15 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
             for (let id of loaders) {
                 const el = document.getElementById(id);
                 if (el && el.style.display !== 'none') {
-                    el.innerText = `עומס שרתים. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
+                    el.innerText = `מנסה לעקוף עומס שרתים. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
                 }
             }
             await new Promise(r => setTimeout(r, waitTime));
         } else {
-            throw new Error("כל המודלים חסומים כרגע עקב עומס בקשות בגוגל. אנא המתן דקה ונסה שוב.");
+            throw new Error("כל המודלים חסומים כרגע (כנראה סיימת את המכסה היומית של כולם). נסה שוב מחר או תרגל מהמאגר!");
         }
     }
 }
-
 
 // ==========================================
 // --- 5. Sentences (Live AI & Static) ---
