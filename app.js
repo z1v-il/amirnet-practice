@@ -5,7 +5,6 @@ let currentFlashcardWord = null;
 let currentQuizWord = null;
 let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
 let currentAiWordObj = null;
-let workingGeminiModel = null;
 
 // --- Saved Banks ---
 let savedAiSentences = JSON.parse(localStorage.getItem('saved_ai_sentences')) || [];
@@ -314,13 +313,7 @@ function saveApiKey() {
 }
 
 // ==========================================
-// --- SMART API FETCHER (Exponential Backoff) ---
-// ==========================================
-// ==========================================
-// --- SMART API FETCHER (Multi-Model Fallback) ---
-// ==========================================
-// ==========================================
-// --- SMART API FETCHER (Ultimate Fallback & Backoff) ---
+// --- SMART API FETCHER (Ultimate Fallback) ---
 // ==========================================
 const FALLBACK_MODELS = [
     'gemini-2.0-flash',
@@ -328,38 +321,29 @@ const FALLBACK_MODELS = [
     'gemini-1.5-pro'
 ];
 
-async function fetchWithRetry(baseUrl, options, maxCycles = 3) {
+async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
     for (let cycle = 0; cycle < maxCycles; cycle++) {
-        
         for (let i = 0; i < FALLBACK_MODELS.length; i++) {
             const currentModel = FALLBACK_MODELS[i];
             const url = baseUrl.replace('gemini-2.0-flash', currentModel);
             
             try {
                 const response = await fetch(url, options);
-                
                 if (response.ok) {
                     if (cycle > 0 || i > 0) console.log(`הצלחה עם מודל: ${currentModel}`);
                     return response; 
                 }
-                
-                // אם המודל לא קיים בחשבון של המשתמש (404), פשוט מדלגים למודל הבא
                 if (response.status === 404) {
-                    console.warn(`מודל ${currentModel} לא קיים (404). מדלג...`);
+                    console.warn(`מודל ${currentModel} לא זמין (404). מדלג...`);
                     continue; 
                 }
-                
-                // אם המודל עמוס (429/503), מדלגים למודל הבא מיד
                 if (response.status === 429 || response.status === 503) {
                     console.warn(`מודל ${currentModel} עמוס (${response.status}).`);
                     continue; 
                 }
-                
-                // שגיאות קריטיות (כמו 400 - מפתח שגוי לחלוטין) נזרוק כדי לא לבזבז זמן
                 if (response.status === 400) {
                     throw new Error("מפתח API לא תקין (שגיאה 400).");
                 }
-                
                 throw new Error(`שגיאת שרת (${response.status})`);
                 
             } catch (error) {
@@ -368,27 +352,24 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 3) {
             }
         }
         
-        // אם הגענו לפה, סימן שכל המודלים ברשימה נכשלו (או שהם עמוסים או שהם לא קיימים)
-        // במקום לקרוס, עכשיו אנחנו מפעילים המתנה ומתחילים את הלולאה שוב מ-2.0!
         if (cycle < maxCycles - 1) {
-            const waitTime = (cycle + 1) * 4000; // ממתין 4 שניות, ואז 8 שניות בניסיון הבא
-            console.warn(`כל המודלים חסומים. ממתין ${waitTime/1000} שניות ומנסה הכל שוב...`);
+            const waitTime = (cycle + 1) * 4000;
+            console.warn(`כל המודלים חסומים. ממתין ${waitTime/1000} שניות ומנסה שוב...`);
             
             const loaders = ['ai-loading', 'restate-loading', 'exam-loading-progress'];
             for (let id of loaders) {
                 const el = document.getElementById(id);
                 if (el && el.style.display !== 'none') {
-                    el.innerText = `השרתים עמוסים כרגע. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
+                    el.innerText = `עומס שרתים. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
                 }
             }
-            
             await new Promise(r => setTimeout(r, waitTime));
         } else {
-            // רק אחרי שעשינו 3 סיבובים מלאים על כל המודלים וחיכינו פעמיים, נוותר.
             throw new Error("כל המודלים חסומים כרגע עקב עומס בקשות בגוגל. אנא המתן דקה ונסה שוב.");
         }
     }
 }
+
 
 // ==========================================
 // --- 5. Sentences (Live AI & Static) ---
@@ -414,14 +395,13 @@ async function generateAISentence() {
     const loadingEl = document.getElementById('ai-loading');
     loadingEl.innerText = 'ה-AI כותב משפט...';
     loadingEl.style.display = 'block';
+    
     document.getElementById('ai-feedback').innerHTML = ''; 
 
     const promptText = `You are an expert test writer for the Israeli Amirnet English exam. Generate a realistic, academic "Sentence Completion" question to test the word "${targetWord}". CRITICAL BALANCE: Upper-B2/C1 level. Provide 4 options. Write explanation in HEBREW. Format exactly: { "sentence": "...", "options": [{"word": "opt1", "translation": "תרגום"}, ...], "correctWord": "${targetWord}", "explanation": "..." }`;
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-        
-        // שימוש בפונקציה החכמה במקום fetch רגיל
         const response = await fetchWithRetry(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -439,7 +419,7 @@ async function generateAISentence() {
         renderAiQuiz(result);
     } catch (error) {
         console.error(error);
-        alert("ה-AI קצת עמוס כרגע. נסה ללחוץ שוב בעוד דקה או תרגל מהמאגר. (שגיאה: " + error.message + ")");
+        alert("תקלה מול ה-AI: " + error.message);
     } finally {
         loadingEl.style.display = 'none';
         document.getElementById('generate-ai-btn').style.display = 'inline-block';
@@ -584,13 +564,13 @@ async function generateRestatement() {
     const loadingEl = document.getElementById('restate-loading');
     loadingEl.innerText = 'ה-AI מנסח שאלה אקדמית...';
     loadingEl.style.display = 'block';
+    
     document.getElementById('restate-feedback').innerHTML = ''; 
 
     const promptText = `You are an expert test writer for the Israeli Amirnet English exam. Generate a realistic "Restatement" question (Upper-B2 / C1 level). RULES: 1. Write original sentence (18-25 words). 2. Format exactly: { "original": "...", "options": ["Correct option...", "Incorrect 1...", "Incorrect 2...", "Incorrect 3..."], "explanation": "הסבר קצר בעברית" }`;
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-        
         const response = await fetchWithRetry(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -608,7 +588,7 @@ async function generateRestatement() {
         renderRestatementQuiz(result);
     } catch (error) {
         console.error(error);
-        alert("ה-AI קצת עמוס כרגע. נסה שוב בעוד דקה. (שגיאה: " + error.message + ")");
+        alert("תקלה מול ה-AI: " + error.message);
     } finally {
         loadingEl.style.display = 'none';
         document.getElementById('generate-restate-btn').style.display = 'inline-block';
@@ -685,7 +665,7 @@ function checkRestatementAnswer(element, selectedIndex, correctIndex, optionsCon
     }
 }
 
-// --- Navigation for Static Banks (No Overrides!) ---
+// --- Navigation for Static Banks ---
 function navigateStatic(type, direction) {
     if (type === 'sent') {
         staticSentIndex += direction;
@@ -727,9 +707,7 @@ function initExamTab() {
 
 async function fetchGeminiData(promptText, stepName) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-    const loadingEl = document.getElementById('exam-loading-progress');
     
-    // שימוש בפונקציית הנסיגה המעריכית גם במבחן מלא
     const response = await fetchWithRetry(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
