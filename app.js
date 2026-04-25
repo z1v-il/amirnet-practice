@@ -386,17 +386,20 @@ function loadStaticSentence() {
         return;
     }
 
-    // חסין לקריסות במקרה של אותיות ריקות או שגיאות הקלדה
+    // התיקון הקריטי: חסין לשורות פגומות במאגר המילים הגדול שלך!
     const getHebrew = (engWord) => {
         if (!engWord || typeof engWord !== 'string') return "חסר במילון";
         if (typeof allWords !== 'undefined') {
-            let match = allWords.find(w => w.eng.toLowerCase().trim() === engWord.toLowerCase().trim());
+            let match = allWords.find(w => 
+                // מוודא שהאובייקט קיים, שיש לו מפתח eng, ושהוא מסוג מחרוזת לפני שמפעיל toLowerCase
+                w && w.eng && typeof w.eng === 'string' && 
+                w.eng.toLowerCase().trim() === engWord.toLowerCase().trim()
+            );
             return match ? match.heb : "חסר במילון";
         }
         return "חסר במילון";
     };
 
-    // מתקן שגיאות JSON של ה-AI אם הוא מחזיר Word במקום word
     const mappedOptions = q.options.map(o => {
         if (typeof o === 'object' && o !== null) {
             let w = o.word || o.Word;
