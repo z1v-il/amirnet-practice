@@ -323,7 +323,8 @@ const FALLBACK_MODELS = [
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
     'gemini-1.5-flash',
-    'gemini-1.5-pro'
+    'gemini-1.5-pro',
+    'gemini-2.5-flash-tts'
 ];
 
 async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
