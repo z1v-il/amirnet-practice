@@ -447,15 +447,30 @@ function loadStaticSentence() {
         return;
     }
     const q = staticSentences[staticSentIndex];
+    
+    // פונקציית עזר: מחפשת את המילה במאגר 5000 המילים שלך ושולפת תרגום
+    const getHebrew = (engWord) => {
+        if (typeof allWords !== 'undefined') {
+            let match = allWords.find(w => w.eng.toLowerCase() === engWord.toLowerCase());
+            return match ? match.heb : "";
+        }
+        return "";
+    };
+
     const formatted = {
         sentence: q.sentence,
-        options: q.options.map(o => ({ word: o, translation: "" })),
+        options: q.options.map(o => ({ word: o, translation: getHebrew(o) })),
         correctWord: q.correctWord,
         explanation: q.explanation
     };
+    
     window.lastQuestionType = 'static-sent';
     renderAiQuiz(formatted);
-    document.getElementById('ai-word-display').innerText = `מאגר מובנה - שאלה ${staticSentIndex + 1} מתוך ${staticSentences.length}`;
+    
+    const displayEl = document.getElementById('ai-word-display');
+    if (displayEl) {
+        displayEl.innerText = `מאגר מובנה - שאלה ${staticSentIndex + 1} מתוך ${staticSentences.length}`;
+    }
 }
 
 function renderAiQuiz(data) {
@@ -465,7 +480,7 @@ function renderAiQuiz(data) {
     const optionsContainer = document.getElementById('ai-options');
     optionsContainer.innerHTML = '';
     optionsContainer.classList.remove('locked');
-    document.getElementById('ai-feedback').innerHTML = ''; // מנקה פידבק קודם
+    document.getElementById('ai-feedback').innerHTML = ''; 
 
     optionsContainer.dataset.explanation = data.explanation || data.Explanation || "לא סופק הסבר.";
 
@@ -476,7 +491,10 @@ function renderAiQuiz(data) {
         let btn = document.createElement('div');
         btn.className = 'mc-option';
         btn.dataset.word = opt.word || opt.Word;
-        btn.dataset.translation = opt.translation || opt.Translation || "אין תרגום";
+        
+        // מעיפים את "אין תרגום" המכוער. אם אין, שיישאר ריק.
+        btn.dataset.translation = opt.translation || opt.Translation || ""; 
+        
         btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${btn.dataset.word}</span>`;
         
         btn.onclick = () => checkAiAnswer(btn, btn.dataset.word, data.correctWord || data.CorrectWord, optionsContainer);
@@ -492,10 +510,9 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         const word = btn.dataset.word;
         const trans = btn.dataset.translation;
         
-        // מציג תרגום רק אם זה AI
-        if (window.lastQuestionType !== 'static-sent') {
-            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span><br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>`;
-        }
+        // אם יש תרגום במאגר, מרנדרים אותו יפה מתחת למילה. אם לא, רק המילה נשארת.
+        const transHtml = trans ? `<br><span style="font-size:1rem; opacity:0.9; margin-top:5px; display:block; color: #94a3b8;">${trans}</span>` : '';
+        btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${word}</span>${transHtml}`;
 
         if (word === correctOpt) btn.classList.add('correct');
         if (word === selectedOptStr && selectedOptStr !== correctOpt) btn.classList.add('wrong');
@@ -508,12 +525,9 @@ function checkAiAnswer(selectedBtn, selectedOptStr, correctOpt, container) {
         feedback.innerHTML = `נכון מאוד! ✔️<br><br><div style="font-size: 1rem; color: var(--text-dark); margin-top: 10px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;"><strong style="color: var(--secondary);">ההקשר:</strong> ${explanation}</div>`;
         feedback.style.color = "var(--success)";
         
-        // --- התיקון שלך: מעביר את המילה ל"יודע" גם אם זו שאלה מהמאגר! ---
         if (!learnedWords.includes(correctOpt)) {
             learnedWords.push(correctOpt);
             unlearnedWords = unlearnedWords.filter(w => w.eng !== correctOpt);
-            
-            // שומר בזיכרון של הדפדפן ומעדכן את שאר המסכים
             localStorage.setItem('amirnet_learned_words', JSON.stringify(learnedWords));
             updateStats();
             renderWordBank();
@@ -619,6 +633,12 @@ function loadStaticRestatement() {
     };
     window.lastQuestionType = 'static-rest';
     renderRestatementQuiz(formatted);
+    
+    // התיקון: מעדכן את הכותרת (שאלה X מתוך Y) בלייב!
+    const displayEl = document.getElementById('restate-word-display');
+    if (displayEl) {
+        displayEl.innerText = `מאגר מובנה - שאלה ${staticRestIndex + 1} מתוך ${staticRestatements.length}`;
+    }
 }
 
 function renderRestatementQuiz(data) {
@@ -934,21 +954,21 @@ function finishExam() {
 function navigateStatic(type, direction) {
     if (type === 'sent') {
         staticSentIndex += direction;
-        // חוסם חריגה מהגבולות של המערך
         if (staticSentIndex < 0) staticSentIndex = 0;
         if (staticSentIndex >= staticSentences.length) staticSentIndex = staticSentences.length - 1;
         
         localStorage.setItem('static_sent_index', staticSentIndex);
         loadStaticSentence();
+        updateBankUI(); // מכריח עדכון בלייב
     } 
     else if (type === 'rest') {
         staticRestIndex += direction;
-        // חוסם חריגה מהגבולות של המערך
         if (staticRestIndex < 0) staticRestIndex = 0;
         if (staticRestIndex >= staticRestatements.length) staticRestIndex = staticRestatements.length - 1;
         
         localStorage.setItem('static_rest_index', staticRestIndex);
         loadStaticRestatement();
+        updateBankUI(); // מכריח עדכון בלייב
     }
 }
 

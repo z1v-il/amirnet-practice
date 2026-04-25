@@ -224,10 +224,41 @@ button:active { transform: scale(0.96); }
 .question-block { background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
 .question-block h4 { direction: ltr; text-align: left; font-size: 1.1rem; margin-top: 0; line-height: 1.4; color: var(--secondary); }
 .options { display: flex; flex-direction: column; gap: 10px; direction: ltr; text-align: left; }
-.option { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; line-height: 1.4; color: var(--text-dark); }
-.option:hover { background: rgba(139, 92, 246, 0.1); border-color: var(--primary); }
-.option.correct { background: var(--success); color: white; border-color: var(--success); }
-.option.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+.options { display: flex; flex-direction: column; gap: 15px; direction: ltr; text-align: left; }
+
+.option { 
+    background: var(--card-bg); 
+    border: 2px solid rgba(255,255,255,0.05); 
+    padding: 18px 25px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: all 0.2s ease-in-out; 
+    line-height: 1.6; 
+    color: var(--text-dark); 
+    font-size: 1.15rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.option:hover { 
+    border-color: var(--primary); 
+    background: rgba(139, 92, 246, 0.1); 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.25);
+}
+
+.option.correct, .option.correct span { 
+    background: var(--success) !important; 
+    color: white !important; 
+    border-color: var(--success) !important; 
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important;
+}
+
+.option.wrong, .option.wrong span { 
+    background: var(--danger) !important; 
+    color: white !important; 
+    border-color: var(--danger) !important; 
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
+}
 
 /* Word Bank */
 .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
