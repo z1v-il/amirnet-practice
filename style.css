@@ -307,27 +307,33 @@ button:active { transform: scale(0.96); }
     }
 }
 
-
 /* --- Reading Exam Split Layout --- */
+
+/* מרחיב משמעותית את הקונטיינר של המבחן כדי שיהיה מקום לשני הצדדים */
+#exams-container {
+    max-width: 1200px; 
+}
+
 .reading-split-container {
     display: flex;
-    gap: 30px;
-    align-items: flex-start;
+    flex-direction: row-reverse; /* הופך את הכיוונים: טקסט משמאל, שאלות מימין */
+    gap: 40px;
+    align-items: stretch;
 }
 
 .reading-text-side {
-    flex: 1.3; /* נותן לטקסט קצת יותר מרווח מהשאלות */
-    height: 400px;
+    flex: 1.4; /* נותן לטקסט הרבה יותר רוחב */
+    height: 550px; /* מגביה את החלון משמעותית כדי למנוע גלילה מוגזמת */
     overflow-y: auto;
     background: rgba(0,0,0,0.2);
-    padding: 25px;
+    padding: 30px;
     border-radius: 12px;
     direction: ltr;
     font-family: 'Georgia', serif;
-    font-size: 1.1rem;
+    font-size: 1.15rem; /* טקסט קצת יותר גדול וקריא */
     line-height: 1.8;
     border-left: 4px solid var(--secondary);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
 }
 
 .reading-text-side p { 
@@ -336,6 +342,11 @@ button:active { transform: scale(0.96); }
     color: #e2e8f0;
 }
 
+/* עיצוב נקי יותר לפס הגלילה של הטקסט */
+.reading-text-side::-webkit-scrollbar { width: 8px; }
+.reading-text-side::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.reading-text-side::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
+
 .reading-question-side {
     flex: 1;
     display: flex;
@@ -343,14 +354,14 @@ button:active { transform: scale(0.96); }
 }
 
 /* התאמה למובייל - מחזיר את זה אחד מתחת לשני במסכים קטנים */
-@media(max-width: 768px) {
+@media(max-width: 900px) {
     .reading-split-container {
         flex-direction: column;
     }
     .reading-text-side {
-        height: 250px;
+        height: 350px;
         width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     .reading-question-side {
         width: 100%;
