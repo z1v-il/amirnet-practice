@@ -811,29 +811,17 @@ function renderExamQuestion() {
     document.getElementById('exam-progress').innerText = `שאלה ${examState.currentQuestionIndex + 1} מתוך ${part.qs.length}`;
     
     const q = part.qs[examState.currentQuestionIndex];
-    let questionHtml = '';
     let rawOptions = q.options || q.Options || [];
     let correctText = rawOptions[0]; 
 
-    if (part.type === 'sentence') {
-        questionHtml = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
-    } else if (part.type === 'restate') {
-        questionHtml = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);"><p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
-    } else if (part.type === 'reading') {
-        let textHtml = `<div style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; direction: ltr; font-family: 'Georgia'; font-size: 1rem; border-left: 3px solid var(--secondary);">`;
-        part.text.paragraphs.forEach(p => textHtml += `<p style="margin-top:0;">${p}</p>`);
-        textHtml += `</div>`;
-        questionHtml = textHtml + `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question || q.Question}</h4>`;
-    }
-
-    qContainer.innerHTML = questionHtml;
-
+    // מערבבים את התשובות
     let shuffledOptions = [...rawOptions];
     for (let i = shuffledOptions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
     }
 
+    // מייצרים את קופסת הכפתורים (התשובות)
     const grid = document.createElement('div');
     grid.className = (part.type === 'sentence') ? 'mc-grid' : 'options';
     if (part.type !== 'sentence') {
@@ -855,12 +843,52 @@ function renderExamQuestion() {
         grid.appendChild(btn);
     });
 
-    qContainer.appendChild(grid);
+    // מייצרים את קופסת הפידבק נסתרת
     const feedbackDiv = document.createElement('div');
     feedbackDiv.id = "exam-q-feedback";
     feedbackDiv.className = "feedback-box";
     feedbackDiv.style.marginTop = "20px";
-    qContainer.appendChild(feedbackDiv);
+
+    // --- חלוקת המסך לפי סוג השאלה ---
+    if (part.type === 'reading') {
+        // פריסה מפוצלת לקטע קריאה
+        const splitContainer = document.createElement('div');
+        splitContainer.className = 'reading-split-container';
+
+        // צד שמאל: הטקסט המלא
+        const textSide = document.createElement('div');
+        textSide.className = 'reading-text-side';
+        part.text.paragraphs.forEach(p => {
+            let pEl = document.createElement('p');
+            pEl.innerText = p;
+            textSide.appendChild(pEl);
+        });
+
+        // צד ימין: השאלה, התשובות והפידבק
+        const qSide = document.createElement('div');
+        qSide.className = 'reading-question-side';
+        qSide.innerHTML = `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question || q.Question}</h4>`;
+        
+        qSide.appendChild(grid);
+        qSide.appendChild(feedbackDiv);
+
+        splitContainer.appendChild(textSide);
+        splitContainer.appendChild(qSide);
+        qContainer.appendChild(splitContainer);
+
+    } else {
+        // פריסה רגילה להשלמת משפטים וניסוח מחדש
+        let questionHtml = '';
+        if (part.type === 'sentence') {
+            questionHtml = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
+        } else if (part.type === 'restate') {
+            questionHtml = `<div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--secondary);"><p style="font-size: 1.3rem; font-weight: bold; direction: ltr; font-family: 'Georgia'; color: white; margin: 0;">${q.original || q.Original}</p></div>`;
+        }
+        
+        qContainer.innerHTML = questionHtml;
+        qContainer.appendChild(grid);
+        qContainer.appendChild(feedbackDiv);
+    }
 }
 
 function handleExamClick(grid, selectedBtn, selectedText, correctText, explanation) {
