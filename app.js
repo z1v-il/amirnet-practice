@@ -318,13 +318,14 @@ function saveApiKey() {
 // ==========================================
 // --- SMART API FETCHER (Ultimate Multi-Model Fallback) ---
 // ==========================================
+// ==========================================
+// --- SMART API FETCHER (Clean Multi-Model Fallback) ---
+// ==========================================
 const FALLBACK_MODELS = [
+    'gemini-2.5-flash',
     'gemini-2.5-pro',
     'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
-    'gemini-2.5-flash-tts'
+    'gemini-2.0-flash-lite'
 ];
 
 async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
@@ -332,13 +333,8 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
         for (let i = 0; i < FALLBACK_MODELS.length; i++) {
             const currentModel = FALLBACK_MODELS[i];
             
-            // מחליף את המודל בכתובת למודל הנוכחי בלולאה
-            let url = baseUrl;
-            if (url.includes('gemini-2.0-flash')) {
-                url = url.replace('gemini-2.0-flash', currentModel);
-            } else if (url.includes('gemini-2.5-flash')) {
-                url = url.replace('gemini-2.5-flash', currentModel);
-            }
+            // מחליף את כל סוגי המודלים ב-URL באופן אוטומטי למודל הנוכחי
+            const url = baseUrl.replace(/gemini-[0-9\.]+(-flash|-pro|-flash-lite)?/, currentModel);
             
             try {
                 const response = await fetch(url, options);
@@ -346,39 +342,41 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
                     console.log(`✅ הצלחה עם מודל: ${currentModel}`);
                     return response; 
                 }
-                if (response.status === 404) {
-                    console.warn(`מודל ${currentModel} לא זמין (404). מדלג...`);
-                    continue; 
-                }
+                
+                // אם המודל עמוס או חסום יומית - מדלגים לבא
                 if (response.status === 429 || response.status === 503) {
-                    console.warn(`מודל ${currentModel} חסום או עמוס יומית/דקתית (${response.status}). עובר למודל הבא...`);
+                    console.warn(`מודל ${currentModel} חסום (429/503). עובר לבא...`);
                     continue; 
                 }
+                
                 if (response.status === 400) {
-                    throw new Error("מפתח API לא תקין (שגיאה 400).");
+                    throw new Error("מפתח API לא תקין (400).");
                 }
+                
+                // מדלג על 404 בשקט
+                if (response.status === 404) continue;
+                
                 throw new Error(`שגיאת שרת (${response.status})`);
                 
             } catch (error) {
                 if (error.message.includes("400")) throw error; 
-                console.warn(`שגיאה ב-${currentModel}: ${error.message}`);
             }
         }
         
         if (cycle < maxCycles - 1) {
-            const waitTime = (cycle + 1) * 4000;
-            console.warn(`כל המודלים חסומים. ממתין ${waitTime/1000} שניות ומנסה שוב...`);
+            const waitTime = (cycle + 1) * 5000;
+            console.warn(`הכל חסום. ממתין ${waitTime/1000} שניות ומנסה שוב...`);
             
             const loaders = ['ai-loading', 'restate-loading', 'exam-loading-progress'];
             for (let id of loaders) {
                 const el = document.getElementById(id);
                 if (el && el.style.display !== 'none') {
-                    el.innerText = `מנסה לעקוף עומס שרתים. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
+                    el.innerText = `עומס בקשות בגוגל. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
                 }
             }
             await new Promise(r => setTimeout(r, waitTime));
         } else {
-            throw new Error("כל המודלים חסומים כרגע (כנראה סיימת את המכסה היומית של כולם). נסה שוב מחר או תרגל מהמאגר!");
+            throw new Error("המכסה של גוגל הסתיימה כרגע לכל המודלים. נסה שוב מחר, או תרגל מהמאגר!");
         }
     }
 }
