@@ -388,8 +388,8 @@ async function generateAISentence() {
     document.getElementById('ai-feedback').innerHTML = ''; 
 
     // פרומפט ממוטב תקציב - מבקש במפורש הסבר סופר-קצר כדי לחסוך טוקנים (כסף)
-    const promptText = `Expert test writer for Israeli Amirnet English exam. Generate 1 "Sentence Completion" question (Upper-B2/C1). RULE 1: Academic sentence (15-25 words) testing the word "${targetWord}". RULE 2: Keep the HEBREW explanation under 12 words to save tokens. Format EXACTLY as raw JSON: { "sentence": "...", "options": [{"word": "opt1", "translation": "Hebrew"}, ...], "correctWord": "${targetWord}", "explanation": "Short Hebrew explanation" }`;
-
+    const promptText = `Expert test writer for Israeli Amirnet English exam. Generate 1 "Sentence Completion" question (Upper-B2/C1). RULE 1: Academic sentence (15-25 words) testing the word "${targetWord}". RULE 2: CRITICAL - The 3 incorrect options MUST have completely different meanings from the correct word. Do NOT use near-synonyms or words from the same semantic field. The exam tests vocabulary breadth, not tricky collocations. RULE 3: Keep the HEBREW explanation under 12 words to save tokens. Format EXACTLY as raw JSON: { "sentence": "...", "options": [{"word": "opt1", "translation": "Hebrew"}, ...], "correctWord": "${targetWord}", "explanation": "Short Hebrew explanation" }`;
+    
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
         const response = await fetchWithRetry(url, {
@@ -725,7 +725,7 @@ async function generateFullExam() {
     document.getElementById('exam-loading').style.display = 'block';
 
     // פרומפטים ממוטבים למבחן המלא (Token Saving & High Quality)
-    const promptSentences = `Expert Amirnet test writer. Generate JSON array of 12 "Sentence Completion" questions (Upper-B2/C1). RULES: 1. Academic sentences (15-25 words). 2. Blank '___' tests a challenging word. 3. Format raw JSON array: [ { "sentence": "...", "options": ["CorrectWord", "Dist1", "Dist2", "Dist3"], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] IMPORTANT: Exactly 12 objects. First option (index 0) MUST be correct. Keep explanation under 10 words.`;
+    const promptSentences = `Expert Amirnet test writer. Generate JSON array of 12 "Sentence Completion" questions (Upper-B2/C1). RULES: 1. Academic sentences (15-25 words). 2. Blank '___' tests a challenging word. 3. CRITICAL: For each question, the 3 distractors MUST have completely different meanings from the correct answer. Do NOT use synonyms or words that mean roughly the same thing. 4. Format raw JSON array: [ { "sentence": "...", "options": ["CorrectWord", "Dist1", "Dist2", "Dist3"], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] IMPORTANT: Exactly 12 objects. First option (index 0) MUST be correct. Keep explanation under 10 words.`;    
     
     const promptRestates = `Expert Amirnet test writer. Generate JSON array of 6 "Restatement" questions (Upper-B2/C1). RULES: 1. Academic original (18-25 words). 2. CRITICAL: Correct restatement MUST significantly alter syntactic structure (e.g. flip clauses), NOT just swap synonyms. 3. All 4 options roughly same word count. 4. Format raw JSON array: [ { "original": "...", "options": ["Correct restatement.", "Dist 1.", "Dist 2.", "Dist 3."], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] IMPORTANT: Exactly 6 objects. First option (index 0) MUST be correct. Keep explanation under 12 words.`;     
     
