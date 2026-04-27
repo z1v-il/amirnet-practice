@@ -316,9 +316,9 @@ function saveApiKey() {
 // --- SMART API FETCHER (Billing Optimized) ---
 // ==========================================
 const FALLBACK_MODELS = [
-    'gemini-2.0-flash', // הכי משתלם ומהיר למשתמשי Billing
-    'gemini-1.5-pro',   // גיבוי חזק מאוד
-    'gemini-1.5-flash'
+    'gemini-2.5-flash', // הכי משתלם ומהיר למשתמשי Billing
+    'gemini-2.0-flash',  
+    'gemini-2.5-pro' // גיבוי חזק מאוד
 ];
 
 async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
