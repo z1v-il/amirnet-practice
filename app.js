@@ -313,37 +313,27 @@ function saveApiKey() {
 }
 
 // ==========================================
-// --- SMART API FETCHER (Ultimate Fallback) ---
-// ==========================================
-// ==========================================
-// --- SMART API FETCHER (Ultimate Multi-Model Fallback) ---
-// ==========================================
-// ==========================================
-// --- SMART API FETCHER (Clean Multi-Model Fallback) ---
+// --- SMART API FETCHER (Billing Optimized) ---
 // ==========================================
 const FALLBACK_MODELS = [
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite'
+    'gemini-2.0-flash', // הכי משתלם ומהיר למשתמשי Billing
+    'gemini-1.5-pro',   // גיבוי חזק מאוד
+    'gemini-1.5-flash'
 ];
 
 async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
     for (let cycle = 0; cycle < maxCycles; cycle++) {
         for (let i = 0; i < FALLBACK_MODELS.length; i++) {
             const currentModel = FALLBACK_MODELS[i];
-            
-            // מחליף את כל סוגי המודלים ב-URL באופן אוטומטי למודל הנוכחי
             const url = baseUrl.replace(/gemini-[0-9\.]+(-flash|-pro|-flash-lite)?/, currentModel);
             
             try {
                 const response = await fetch(url, options);
                 if (response.ok) {
-                    console.log(`✅ הצלחה עם מודל: ${currentModel}`);
+                    if (cycle > 0 || i > 0) console.log(`✅ הצלחה עם מודל: ${currentModel}`);
                     return response; 
                 }
                 
-                // אם המודל עמוס או חסום יומית - מדלגים לבא
                 if (response.status === 429 || response.status === 503) {
                     console.warn(`מודל ${currentModel} חסום (429/503). עובר לבא...`);
                     continue; 
@@ -353,7 +343,6 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
                     throw new Error("מפתח API לא תקין (400).");
                 }
                 
-                // מדלג על 404 בשקט
                 if (response.status === 404) continue;
                 
                 throw new Error(`שגיאת שרת (${response.status})`);
@@ -364,19 +353,11 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
         }
         
         if (cycle < maxCycles - 1) {
-            const waitTime = (cycle + 1) * 5000;
-            console.warn(`הכל חסום. ממתין ${waitTime/1000} שניות ומנסה שוב...`);
-            
-            const loaders = ['ai-loading', 'restate-loading', 'exam-loading-progress'];
-            for (let id of loaders) {
-                const el = document.getElementById(id);
-                if (el && el.style.display !== 'none') {
-                    el.innerText = `עומס בקשות בגוגל. מנסה שוב אוטומטית בעוד ${waitTime/1000} שניות... ⏳`;
-                }
-            }
+            const waitTime = 3000; // המתנה קצרה מאוד בגלל ה-Billing
+            console.warn(`ממתין ${waitTime/1000} שניות ומנסה שוב...`);
             await new Promise(r => setTimeout(r, waitTime));
         } else {
-            throw new Error("המכסה של גוגל הסתיימה כרגע לכל המודלים. נסה שוב מחר, או תרגל מהמאגר!");
+            throw new Error("שגיאת תקשורת מול גוגל. נסה שוב.");
         }
     }
 }
@@ -404,10 +385,10 @@ async function generateAISentence() {
     const loadingEl = document.getElementById('ai-loading');
     loadingEl.innerText = 'ה-AI כותב משפט...';
     loadingEl.style.display = 'block';
-    
     document.getElementById('ai-feedback').innerHTML = ''; 
 
-    const promptText = `You are an expert test writer for the Israeli Amirnet English exam. Generate a realistic, academic "Sentence Completion" question to test the word "${targetWord}". CRITICAL BALANCE: Upper-B2/C1 level. Provide 4 options. Write explanation in HEBREW. Format exactly: { "sentence": "...", "options": [{"word": "opt1", "translation": "תרגום"}, ...], "correctWord": "${targetWord}", "explanation": "..." }`;
+    // פרומפט ממוטב תקציב - מבקש במפורש הסבר סופר-קצר כדי לחסוך טוקנים (כסף)
+    const promptText = `Expert test writer for Israeli Amirnet English exam. Generate 1 "Sentence Completion" question (Upper-B2/C1). RULE 1: Academic sentence (15-25 words) testing the word "${targetWord}". RULE 2: Keep the HEBREW explanation under 12 words to save tokens. Format EXACTLY as raw JSON: { "sentence": "...", "options": [{"word": "opt1", "translation": "Hebrew"}, ...], "correctWord": "${targetWord}", "explanation": "Short Hebrew explanation" }`;
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
@@ -419,8 +400,6 @@ async function generateAISentence() {
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
-        
-        // תיקון: מנקה עטיפות קוד שגוגל מוסיפה בטעות
         jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
         const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
         if (jsonMatch) jsonText = jsonMatch[0];
@@ -580,7 +559,8 @@ async function generateRestatement() {
     
     document.getElementById('restate-feedback').innerHTML = ''; 
 
-    const promptText = `You are an expert test writer for the Israeli Amirnet English exam. Generate a realistic "Restatement" question (Upper-B2 / C1 level). RULES: 1. Write original sentence (18-25 words). 2. CRITICAL: All 4 options MUST be roughly the same length (similar word count). Do not make the distractors unnecessarily complicated, just ensure the correct answer isn't visually longer than the rest. 3. Format exactly: { "original": "...", "options": ["Correct option...", "Incorrect 1...", "Incorrect 2...", "Incorrect 3..."], "explanation": "הסבר קצר בעברית" }`;
+    // פרומפט ממוטב תקציב ורמה גבוהה
+    const promptText = `Expert Amirnet test writer. Generate 1 "Restatement" question (Upper-B2/C1). RULES: 1. Academic original sentence (18-25 words). 2. CRITICAL: The correct restatement MUST alter the syntactic structure (e.g., flip clauses), NOT just swap synonyms. 3. All 4 options MUST be roughly the same length. 4. Keep HEBREW explanation under 12 words to save tokens. Format raw JSON: { "original": "...", "options": ["Correct option...", "Incorrect 1...", "Incorrect 2...", "Incorrect 3..."], "explanation": "Short Hebrew explanation" }`;
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
@@ -592,8 +572,6 @@ async function generateRestatement() {
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
-        
-        // תיקון: מנקה עטיפות קוד
         jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
         const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
         if (jsonMatch) jsonText = jsonMatch[0];
@@ -646,19 +624,19 @@ function renderRestatementQuiz(data) {
     const optionsArray = data.options || data.Options || [];
     let correctText = optionsArray[data.correctIndex !== undefined ? data.correctIndex : 0];
 
-    let shuffledOptions = [...optionsArray];
-    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+    // אלגוריתם ערבוב אגרסיבי למניעת תשובה נכונה תמיד במיקום 1
+    let optionsObjects = optionsArray.map(text => ({ text: text, isCorrect: text === correctText }));
+    for (let i = optionsObjects.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        [optionsObjects[i], optionsObjects[j]] = [optionsObjects[j], optionsObjects[i]];
     }
 
-    const newCorrectIndex = shuffledOptions.indexOf(correctText);
-    shuffledOptions.forEach((optText, index) => {
+    optionsObjects.forEach((opt, index) => {
         let optElement = document.createElement('div');
         optElement.className = 'option';
         optElement.style.fontSize = '1.1rem';
-        optElement.innerText = optText;
-        optElement.onclick = () => checkRestatementAnswer(optElement, index, newCorrectIndex, optionsContainer);
+        optElement.innerText = opt.text;
+        optElement.onclick = () => checkRestatementAnswer(optElement, index, optionsObjects.findIndex(o => o.isCorrect), optionsContainer);
         optionsContainer.appendChild(optElement);
     });
 }
@@ -709,7 +687,7 @@ function exportAiBank() {
 }
 
 // ==========================================
-// --- 7. Full Amirnet Simulation Engine ---
+// --- 7. Full Amirnet Simulation Engine (FAST MODE) ---
 // ==========================================
 
 let examTimer;
@@ -734,7 +712,6 @@ async function fetchGeminiData(promptText, stepName) {
     const data = await response.json();
     let jsonText = data.candidates[0].content.parts[0].text;
     
-    // תיקון: מנקה עטיפות קוד
     jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
     const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     if (jsonMatch) jsonText = jsonMatch[0];
@@ -747,13 +724,14 @@ async function generateFullExam() {
     document.getElementById('btn-generate-exam').style.display = 'none';
     document.getElementById('exam-loading').style.display = 'block';
 
-    const promptSentences = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON array of 12 "Sentence Completion" questions (Upper-B2 / C1 level). RULES: 1. Sentences must be academic and natural (15-25 words). 2. The blank '___' must test a challenging word. 3. Format exactly as a raw JSON array: [ { "sentence": "...", "options": ["CorrectWord", "Distractor1", "Distractor2", "Distractor3"], "correctIndex": 0, "explanation": "..." } ] IMPORTANT: Generate exactly 12 objects. First option (index 0) MUST be the correct one.`;
+    // פרומפטים ממוטבים למבחן המלא (Token Saving & High Quality)
+    const promptSentences = `Expert Amirnet test writer. Generate JSON array of 12 "Sentence Completion" questions (Upper-B2/C1). RULES: 1. Academic sentences (15-25 words). 2. Blank '___' tests a challenging word. 3. Format raw JSON array: [ { "sentence": "...", "options": ["CorrectWord", "Dist1", "Dist2", "Dist3"], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] IMPORTANT: Exactly 12 objects. First option (index 0) MUST be correct. Keep explanation under 10 words.`;
     
-    const promptRestates = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON array of 6 "Restatement" questions (Upper-B2 / C1 level). RULES: 1. Original sentences must be academic and logical (18-25 words). 2. CRITICAL: All 4 options MUST have roughly the same word count. Do not make the distractors overly difficult, just prevent the correct answer from standing out as the longest. 3. Format exactly as a raw JSON array: [ { "original": "...", "options": ["Correct restatement.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "..." } ] IMPORTANT: Generate exactly 6 objects. First option (index 0) MUST be the correct one.`;
+    const promptRestates = `Expert Amirnet test writer. Generate JSON array of 6 "Restatement" questions (Upper-B2/C1). RULES: 1. Academic original (18-25 words). 2. CRITICAL: Correct restatement MUST significantly alter syntactic structure (e.g. flip clauses), NOT just swap synonyms. 3. All 4 options roughly same word count. 4. Format raw JSON array: [ { "original": "...", "options": ["Correct restatement.", "Dist 1.", "Dist 2.", "Dist 3."], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] IMPORTANT: Exactly 6 objects. First option (index 0) MUST be correct. Keep explanation under 12 words.`;     
     
-    const promptReading = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON object for a "Reading Comprehension" section. RULES: 1. Write a standard, university-level academic text (3 short paragraphs). 2. Generate 5 questions. 3. CRITICAL: For each question, all 4 options MUST be roughly the same length. Keep them straightforward but visually equal so there are no visual clues. 4. Format exactly as a raw JSON object: { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "..." } ] } IMPORTANT: First option (index 0) MUST be the correct one.`;
+    const promptReading = `Expert Amirnet test writer. Generate JSON object for "Reading Comprehension". RULES: 1. Standard academic text (3 short paragraphs). 2. Generate 5 questions. 3. All 4 options roughly same length per question. 4. Format raw JSON object: { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Dist 1.", "Dist 2.", "Dist 3."], "correctIndex": 0, "explanation": "Short Hebrew explanation" } ] } IMPORTANT: First option (index 0) MUST be correct. Keep explanations under 12 words.`;
 
-    // תיקון: הפונקציה שנעלמה וחזרה
+    // השהיה מינימלית בלבד (1.5 שניות) למניעת קריסות רשת מקומיות
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     try {
@@ -761,15 +739,11 @@ async function generateFullExam() {
         
         loadingProgress.innerText = "שלב 1/3: כותב שאלות השלמת משפטים... ⏳";
         const sentencesData = await fetchGeminiData(promptSentences, "משפטים");
-        
-        loadingProgress.innerText = "ממתין 12 שניות כדי לא להעמיס על גוגל... 🛑";
-        await sleep(12000); 
+        await sleep(1500); 
         
         loadingProgress.innerText = "שלב 2/3: כותב שאלות ניסוח מחדש... ⏳";
         const restatesData = await fetchGeminiData(promptRestates, "ניסוחים");
-        
-        loadingProgress.innerText = "ממתין 12 שניות אחרונות לפני החלק האחרון... 🛑";
-        await sleep(12000); 
+        await sleep(1500); 
         
         loadingProgress.innerText = "שלב 3/3: כותב קטע קריאה אקדמי... ⏳";
         const readingDataAI = await fetchGeminiData(promptReading, "קריאה");
@@ -836,48 +810,43 @@ function renderExamQuestion() {
     let rawOptions = q.options || q.Options || [];
     let correctText = rawOptions[0]; 
 
-    // מערבבים את התשובות
-    let shuffledOptions = [...rawOptions];
-    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+    // אלגוריתם ערבוב אגרסיבי גם במבחן המלא
+    let optionsObjects = rawOptions.map(text => ({ text: text, isCorrect: text === correctText }));
+    for (let i = optionsObjects.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        [optionsObjects[i], optionsObjects[j]] = [optionsObjects[j], optionsObjects[i]];
     }
 
-    // מייצרים את קופסת הכפתורים (התשובות)
     const grid = document.createElement('div');
     grid.className = (part.type === 'sentence') ? 'mc-grid' : 'options';
     if (part.type !== 'sentence') {
         grid.style.display = 'flex'; grid.style.flexDirection = 'column'; grid.style.gap = '10px';
     }
 
-    shuffledOptions.forEach(optText => {
+    optionsObjects.forEach(opt => {
         let btn = document.createElement('div');
         btn.className = (part.type === 'sentence') ? 'mc-option' : 'option';
         if (part.type === 'sentence') {
-            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${optText}</span>`;
+            btn.innerHTML = `<span style="font-size:1.2rem; font-weight:bold;">${opt.text}</span>`;
             btn.style.minHeight = '60px';
         } else {
-            btn.innerText = optText;
+            btn.innerText = opt.text;
             btn.style.direction = 'ltr'; btn.style.textAlign = 'left'; btn.style.fontSize = '1.1rem';
         }
-        btn.dataset.val = optText;
-        btn.onclick = () => handleExamClick(grid, btn, optText, correctText, q.explanation);
+        btn.dataset.val = opt.text;
+        btn.onclick = () => handleExamClick(grid, btn, opt.text, correctText, q.explanation);
         grid.appendChild(btn);
     });
 
-    // מייצרים את קופסת הפידבק נסתרת
     const feedbackDiv = document.createElement('div');
     feedbackDiv.id = "exam-q-feedback";
     feedbackDiv.className = "feedback-box";
     feedbackDiv.style.marginTop = "20px";
 
-    // --- חלוקת המסך לפי סוג השאלה ---
     if (part.type === 'reading') {
-        // פריסה מפוצלת לקטע קריאה
         const splitContainer = document.createElement('div');
         splitContainer.className = 'reading-split-container';
 
-        // צד שמאל: הטקסט המלא
         const textSide = document.createElement('div');
         textSide.className = 'reading-text-side';
         part.text.paragraphs.forEach(p => {
@@ -886,7 +855,6 @@ function renderExamQuestion() {
             textSide.appendChild(pEl);
         });
 
-        // צד ימין: השאלה, התשובות והפידבק
         const qSide = document.createElement('div');
         qSide.className = 'reading-question-side';
         qSide.innerHTML = `<h4 style="direction: ltr; font-size: 1.2rem; color: var(--text-dark); margin-bottom: 15px;">${q.question || q.Question}</h4>`;
@@ -899,7 +867,6 @@ function renderExamQuestion() {
         qContainer.appendChild(splitContainer);
 
     } else {
-        // פריסה רגילה להשלמת משפטים וניסוח מחדש
         let questionHtml = '';
         if (part.type === 'sentence') {
             questionHtml = `<p style="font-size: 1.5rem; direction: ltr; font-family: 'Georgia'; line-height: 1.6;">${q.sentence || q.Sentence}</p>`;
