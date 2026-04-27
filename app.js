@@ -384,7 +384,6 @@ async function fetchWithRetry(baseUrl, options, maxCycles = 2) {
 // ==========================================
 // --- 5. Sentences (Live AI & Static) ---
 // ==========================================
-
 async function generateAISentence() {
     if (!geminiApiKey) { alert("חסר מפתח API."); return; }
     
@@ -420,8 +419,12 @@ async function generateAISentence() {
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
-        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        
+        // תיקון: מנקה עטיפות קוד שגוגל מוסיפה בטעות
+        jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
         if (jsonMatch) jsonText = jsonMatch[0];
+        
         const result = JSON.parse(jsonText.replace(/,\s*([\]}])/g, '$1'));
         
         savedAiSentences.push(result);
@@ -579,7 +582,6 @@ async function generateRestatement() {
 
     const promptText = `You are an expert test writer for the Israeli Amirnet English exam. Generate a realistic "Restatement" question (Upper-B2 / C1 level). RULES: 1. Write original sentence (18-25 words). 2. CRITICAL: All 4 options MUST be roughly the same length (similar word count). Do not make the distractors unnecessarily complicated, just ensure the correct answer isn't visually longer than the rest. 3. Format exactly: { "original": "...", "options": ["Correct option...", "Incorrect 1...", "Incorrect 2...", "Incorrect 3..."], "explanation": "הסבר קצר בעברית" }`;
 
-
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
         const response = await fetchWithRetry(url, {
@@ -590,8 +592,12 @@ async function generateRestatement() {
 
         const data = await response.json();
         let jsonText = data.candidates[0].content.parts[0].text;
-        const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+        
+        // תיקון: מנקה עטיפות קוד
+        jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
         if (jsonMatch) jsonText = jsonMatch[0];
+        
         const result = JSON.parse(jsonText.replace(/,\s*([\]}])/g, '$1'));
         
         savedAiRestatements.push(result);
@@ -727,8 +733,12 @@ async function fetchGeminiData(promptText, stepName) {
 
     const data = await response.json();
     let jsonText = data.candidates[0].content.parts[0].text;
+    
+    // תיקון: מנקה עטיפות קוד
+    jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
     const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
     if (jsonMatch) jsonText = jsonMatch[0];
+    
     return JSON.parse(jsonText.replace(/,\s*([\]}])/g, '$1'));
 }
 
@@ -743,14 +753,23 @@ async function generateFullExam() {
     
     const promptReading = `You are an expert test writer for the Israeli Amirnet English exam. Generate a JSON object for a "Reading Comprehension" section. RULES: 1. Write a standard, university-level academic text (3 short paragraphs). 2. Generate 5 questions. 3. CRITICAL: For each question, all 4 options MUST be roughly the same length. Keep them straightforward but visually equal so there are no visual clues. 4. Format exactly as a raw JSON object: { "title": "Academic Title", "paragraphs": ["Par 1...", "Par 2...", "Par 3..."], "questions": [ { "question": "...", "options": ["Correct answer.", "Distractor 1.", "Distractor 2.", "Distractor 3."], "correctIndex": 0, "explanation": "..." } ] } IMPORTANT: First option (index 0) MUST be the correct one.`;
 
+    // תיקון: הפונקציה שנעלמה וחזרה
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
     try {
         const loadingProgress = document.getElementById('exam-loading-progress');
         
         loadingProgress.innerText = "שלב 1/3: כותב שאלות השלמת משפטים... ⏳";
         const sentencesData = await fetchGeminiData(promptSentences, "משפטים");
         
+        loadingProgress.innerText = "ממתין 12 שניות כדי לא להעמיס על גוגל... 🛑";
+        await sleep(12000); 
+        
         loadingProgress.innerText = "שלב 2/3: כותב שאלות ניסוח מחדש... ⏳";
         const restatesData = await fetchGeminiData(promptRestates, "ניסוחים");
+        
+        loadingProgress.innerText = "ממתין 12 שניות אחרונות לפני החלק האחרון... 🛑";
+        await sleep(12000); 
         
         loadingProgress.innerText = "שלב 3/3: כותב קטע קריאה אקדמי... ⏳";
         const readingDataAI = await fetchGeminiData(promptReading, "קריאה");
