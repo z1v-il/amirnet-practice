@@ -60,7 +60,292 @@ const staticSentences = [
 { "sentence": "The breathtaking beauty of a colorful summer rainbow is inherently _________, slowly fading away from the sky in a mere matter of fleeting, precious minutes.", "options": ["ephemeral", "perpetual", "infinite", "relentless"], "correctWord": "ephemeral", "explanation": "המילה ephemeral (חולף/זמני) מתארת את היופי של הקשת שנעלמת במהירות." },
 { "sentence": "The university decided to explicitly invite the highly _________ professor to deliver the keynote address due to his vast, unparalleled knowledge of medieval European literature.", "options": ["erudite", "ignorant", "inane", "vacuous"], "correctWord": "erudite", "explanation": "המילה erudite (מלומד) מסבירה מדוע בחרו בו לשאת את נאום הפתיחה." },
 { "sentence": "Attempting to rapidly and aggressively dry the severe chemical burn with a coarse towel will merely _________ the intense pain and damage the delicate tissue further.", "options": ["exacerbate", "mitigate", "alleviate", "assuage"], "correctWord": "exacerbate", "explanation": "המילה exacerbate (להחמיר) מסבירה ששפשוף כוויה כימית במגבת יגרום נזק נוסף." },
-{ "sentence": "The sudden emergence of a previously hidden surveillance video served to entirely _________ the falsely accused employee, proving he was completely absent from the crime scene.", "options": ["exonerate", "implicate", "condemn", "incarcerate"], "correctWord": "exonerate", "explanation": "המילה exonerate (לזכות מאשמה) מסבירה את שחרורו של העובד הודות לווידאו." }
+{ "sentence": "The sudden emergence of a previously hidden surveillance video served to entirely _________ the falsely accused employee, proving he was completely absent from the crime scene.", "options": ["exonerate", "implicate", "condemn", "incarcerate"], "correctWord": "exonerate", "explanation": "המילה exonerate (לזכות מאשמה) מסבירה את שחרורו של העובד הודות לווידאו." },
+{
+"sentence": "The newly discovered ceramic fragments are highly ___, requiring archaeologists to handle them with extraordinary care during excavation.",
+"options": ["fragile", "ubiquitous", "redundant", "coherent"],
+"correctIndex": 0,
+"explanation": "שברי הקרמיקה שבריריים ולכן דורשים טיפול זהיר."
+},
+{
+"sentence": "The sudden collapse of the massive star created a highly ___ burst of gamma radiation visible across the galaxy.",
+"options": ["luminous", "arbitrary", "stagnant", "subjective"],
+"correctIndex": 0,
+"explanation": "קריסת הכוכב יצרה פרץ קרינה מאיר וזוהר."
+},
+{
+"sentence": "Children demonstrate an innate ability to grasp complex grammatical rules, suggesting that syntax acquisition is an ___ human trait.",
+"options": ["inherent", "obsolete", "vindictive", "superficial"],
+"correctIndex": 0,
+"explanation": "רכישת שפה היא תכונה מולדת וטבעית אצל בני אדם."
+},
+{
+"sentence": "Deep beneath the Earth's surface, tectonic plates experience constant friction, which eventually leads to ___ shifts that trigger earthquakes.",
+"options": ["erratic", "meticulous", "plausible", "chronological"],
+"correctIndex": 0,
+"explanation": "חיכוך הלוחות גורם לתזוזות בלתי צפויות ומשתנות."
+},
+{
+"sentence": "Renaissance painters revolutionized visual representation by employing linear perspective to create a profound illusion of ___ on a flat canvas.",
+"options": ["depth", "bias", "velocity", "nutrition"],
+"correctIndex": 0,
+"explanation": "פרספקטיבה קווית יצרה אשליית עומק על הבד השטוח."
+},
+{
+"sentence": "In environments with limited sunlight, certain fern species have evolved highly efficient photosynthetic mechanisms to ___ their energy absorption.",
+"options": ["maximize", "alienate", "confess", "translate"],
+"correctIndex": 0,
+"explanation": "השרכים פיתחו מנגנונים כדי למקסם את ספיגת האנרגיה."
+},
+{
+"sentence": "The central bank decided to aggressively raise interest rates in a deliberate attempt to ___ the rapidly rising inflation.",
+"options": ["curtail", "venerate", "diagnose", "embellish"],
+"correctIndex": 0,
+"explanation": "הבנק המרכזי העלה ריבית כדי להפחית ולצמצם את האינפלציה."
+},
+{
+"sentence": "Synaptic plasticity is the fundamental biological process that allows the human brain to ___ structurally in response to new experiences.",
+"options": ["adapt", "surrender", "harvest", "dictate"],
+"correctIndex": 0,
+"explanation": "גמישות סינפטית מאפשרת למוח להסתגל לחוויות חדשות."
+},
+{
+"sentence": "Rising ocean temperatures severely threaten reef ecosystems, causing widespread coral bleaching and a subsequent ___ of local marine biodiversity.",
+"options": ["depletion", "consensus", "narrative", "geometry"],
+"correctIndex": 0,
+"explanation": "התחממות האוקיינוסים גורמת להידלדלות של המגוון הביולוגי הימי."
+},
+{
+"sentence": "The rapid influx of wealthy residents into the historic neighborhood inevitably caused a ___ of long-time, lower-income tenants.",
+"options": ["displacement", "hydration", "symphony", "gravity"],
+"correctIndex": 0,
+"explanation": "כניסת תושבים עשירים גרמה לעקירתם של דיירים ותיקים."
+},
+{
+"sentence": "The phenomenon of quantum entanglement suggests that particles can remain intricately connected, transmitting information instantaneously across ___ distances.",
+"options": ["vast", "edible", "sarcastic", "fluent"],
+"correctIndex": 0,
+"explanation": "חלקיקים שזורים מעבירים מידע באופן מיידי על פני מרחקים עצומים."
+},
+{
+"sentence": "Optimal fossilization typically requires an environment entirely devoid of oxygen to effectively ___ the rapid decomposition of organic tissues.",
+"options": ["hinder", "nominate", "calculate", "rejoice"],
+"correctIndex": 0,
+"explanation": "סביבה חסרת חמצן מעכבת ומונעת את הפירוק המהיר של רקמות."
+},
+{
+"sentence": "Classical composers often utilized unexpected harmonic progressions to deliberately create an emotional ___ that resolves only at the end.",
+"options": ["tension", "agriculture", "vocabulary", "transparency"],
+"correctIndex": 0,
+"explanation": "מהלכים הרמוניים בלתי צפויים יוצרים מתח רגשי ביצירה."
+},
+{
+"sentence": "Epidemiologists closely monitor viral mutation rates to accurately predict the potential ___ of future infectious disease outbreaks globally.",
+"options": ["trajectory", "molecule", "metaphor", "landscape"],
+"correctIndex": 0,
+"explanation": "חוקרים עוקבים אחר מוטציות כדי לחזות את מסלול ההתפרצויות."
+},
+{
+"sentence": "Proportional representation systems are often designed to ensure that minority political factions are not completely ___ in the legislature.",
+"options": ["marginalized", "hydrated", "illuminated", "synthesized"],
+"correctIndex": 0,
+"explanation": "ייצוג יחסי מונע את דחיקתם לשוליים של פלגים פוליטיים קטנים."
+},
+{
+"sentence": "Meteorologists rely on advanced satellite imagery to carefully track the pressure systems that ___ the formation of tropical cyclones.",
+"options": ["precipitate", "apologize", "decorate", "chew"],
+"correctIndex": 0,
+"explanation": "מערכות הלחץ מאיצות או גורמות להיווצרותן של סופות ציקלון."
+},
+{
+"sentence": "Empiricists staunchly argue that all meaningful knowledge must necessarily be ___ from direct sensory experience rather than abstract reasoning.",
+"options": ["derived", "expelled", "pardoned", "scheduled"],
+"correctIndex": 0,
+"explanation": "אמפיריציסטים טוענים שידע חייב להיות מופק או נגזר מחוויה חושית."
+},
+{
+"sentence": "Modern genomic sequencing techniques have become so incredibly efficient that scientists can map an entire organism's DNA with unprecedented ___.",
+"options": ["precision", "arrogance", "comedy", "friction"],
+"correctIndex": 0,
+"explanation": "טכניקות הריצוף המודרניות מאפשרות מיפוי גנטי בדיוק חסר תקדים."
+},
+{
+"sentence": "The innovative suspension bridge was engineered with flexible materials to gracefully withstand the immense ___ exerted by gale-force winds.",
+"options": ["stress", "irony", "recipe", "currency"],
+"correctIndex": 0,
+"explanation": "הגשר התלוי תוכנן לעמוד בעומס ובלחץ של רוחות עזות."
+},
+{
+"sentence": "Anthropological studies reveal that traditional kinship structures often establish a strict social hierarchy that ___ acceptable behaviors within the tribe.",
+"options": ["dictates", "cleanses", "ferments", "sails"],
+"correctIndex": 0,
+"explanation": "מבני קירבה מסורתיים מכתיבים את ההתנהגויות המקובלות בשבט."
+},
+{
+"sentence": "Adding a chemical catalyst to the volatile mixture will significantly ___ the reaction without being consumed in the process.",
+"options": ["accelerate", "mourn", "translate", "broadcast"],
+"correctIndex": 0,
+"explanation": "הוספת זרז כימי תאיץ משמעותית את התגובה."
+},
+{
+"sentence": "The sudden extinction of a keystone predator can completely destabilize the local ecosystem, causing unforeseen and highly detrimental ___.",
+"options": ["consequences", "ingredients", "syllables", "altitudes"],
+"correctIndex": 0,
+"explanation": "הכחדת טורף מפתח עלולה לגרום להשלכות הרסניות ובלתי צפויות."
+},
+{
+"sentence": "Individuals experiencing cognitive dissonance frequently employ elaborate defense mechanisms to instinctively ___ their contradictory beliefs and actions.",
+"options": ["rationalize", "evaporate", "stitch", "harvest"],
+"correctIndex": 0,
+"explanation": "אנשים החווים דיסוננס קוגניטיבי נוטים לרציונליזציה של אמונותיהם הסותרות."
+},
+{
+"sentence": "Following the devastating conflict, the diplomatic treaty was deliberately crafted to ___ relations and establish lasting peace between the nations.",
+"options": ["normalize", "orchestrate", "fossilize", "infect"],
+"correctIndex": 0,
+"explanation": "ההסכם הדיפלומטי נועד לנרמל את היחסים בין האומות."
+},
+{
+"sentence": "The software engineer optimized the search algorithm to efficiently process enormous datasets without causing a noticeable system ___.",
+"options": ["lag", "poetry", "flavor", "canvas"],
+"correctIndex": 0,
+"explanation": "האלגוריתם שופר כדי לעבד נתונים ללא השהיה או עיכוב במערכת."
+},
+{
+"sentence": "Implementing systematic crop rotation techniques is absolutely essential for farmers aiming to sustainably maintain soil ___ over multiple decades.",
+"options": ["fertility", "censorship", "gravity", "punctuation"],
+"correctIndex": 0,
+"explanation": "מחזור זרעים חיוני לשמירה על פוריות הקרקע לאורך זמן."
+},
+{
+"sentence": "The novel's protagonist is an unreliable narrator whose deeply biased perspective continuously distorts the ___ truth of the events.",
+"options": ["objective", "porous", "melodic", "athletic"],
+"correctIndex": 0,
+"explanation": "נקודת המבט המשוחדת של המספר מעוותת את האמת האובייקטיבית."
+},
+{
+"sentence": "Advanced encryption protocols utilize extremely complex mathematical algorithms to effectively secure sensitive digital information against unauthorized ___.",
+"options": ["interception", "geometry", "pollination", "nutrition"],
+"correctIndex": 0,
+"explanation": "פרוטוקולי הצפנה מגנים על מידע רגיש מפני יירוט לא מורשה."
+},
+{
+"sentence": "Deep sea currents operate as a global conveyor belt, steadily regulating the Earth's climate by transporting ___ across vast oceans.",
+"options": ["heat", "guilt", "vocabulary", "democracy"],
+"correctIndex": 0,
+"explanation": "זרמי האוקיינוס מווסתים את האקלים על ידי העברת חום."
+},
+{
+"sentence": "Complex carbohydrates undergo a gradual breakdown in the digestive system, providing the human body with a ___ release of energy.",
+"options": ["sustained", "cynical", "alphabetical", "aquatic"],
+"correctIndex": 0,
+"explanation": "פחמימות מורכבות מספקות לגוף שחרור מתמשך ורציף של אנרגיה."
+},
+{
+"sentence": "The second law of thermodynamics explicitly states that the total entropy of an isolated system will inevitably ___ over time.",
+"options": ["increase", "apologize", "breathe", "whisper"],
+"correctIndex": 0,
+"explanation": "החוק השני של התרמודינמיקה קובע שהאנטרופיה במערכת מבודדת תגדל."
+},
+{
+"sentence": "Forensic investigators meticulously collected microscopic fibers from the crime scene, hoping the trace evidence would correctly ___ the suspect.",
+"options": ["implicate", "fertilize", "serenade", "refrigerate"],
+"correctIndex": 0,
+"explanation": "החוקרים קיוו שהראיות המיקרוסקופיות יסבכו ויפלילו את החשוד."
+},
+{
+"sentence": "Historically, early mapmakers frequently struggled with the geometric challenge of accurately projecting a spherical planet onto a ___ surface.",
+"options": ["flat", "edible", "sarcastic", "noisy"],
+"correctIndex": 0,
+"explanation": "קרטוגרפים התקשו להשליך במדויק כוכב לכת כדורי על משטח שטוח."
+},
+{
+"sentence": "Many industrialized nations are currently confronting severe economic challenges strictly due to the rapid ___ of their domestic populations.",
+"options": ["aging", "spelling", "digestion", "orbit"],
+"correctIndex": 0,
+"explanation": "מדינות מתועשות מתמודדות עם אתגרים כלכליים עקב הזדקנות האוכלוסייה."
+},
+{
+"sentence": "Proponents of moral relativism firmly argue that ethical principles are entirely culturally subjective rather than absolutely ___ across all societies.",
+"options": ["universal", "metallic", "nocturnal", "crispy"],
+"correctIndex": 0,
+"explanation": "רלטיביזם מוסרי גורס כי עקרונות אתיים אינם אוניברסליים אלא תלויי תרבות."
+},
+{
+"sentence": "The autonomous drone was expertly programmed to independently navigate complex urban environments using an array of sophisticated ___.",
+"options": ["sensors", "poems", "treaties", "calories"],
+"correctIndex": 0,
+"explanation": "הרחפן האוטונומי מנווט בסביבות מורכבות באמצעות מערך של חיישנים."
+},
+{
+"sentence": "Prolonged exposure to intense ultraviolet light without adequate protection can cause irreversible cellular degradation within the human ___.",
+"options": ["retina", "dialect", "parliament", "peninsula"],
+"correctIndex": 0,
+"explanation": "חשיפה ממושכת לאור אולטרה סגול עלולה לפגוע ברשתית העין."
+},
+{
+"sentence": "Underground fungal networks establish mutually beneficial symbiotic relationships with tree roots, significantly facilitating the vital exchange of ___.",
+"options": ["nutrients", "insults", "melodies", "currencies"],
+"correctIndex": 0,
+"explanation": "רשתות פטרייתיות מאפשרות חילופי חומרי הזנה עם שורשי העצים."
+},
+{
+"sentence": "Despite employing advanced monitoring technology, accurately forecasting the exact timing of a major earthquake remains a highly ___ endeavor.",
+"options": ["elusive", "nutritious", "grammatical", "orchestral"],
+"correctIndex": 0,
+"explanation": "חיזוי מדויק של רעידות אדמה נותר משימה חמקמקה וקשה להשגה."
+},
+{
+"sentence": "Constructivist educational theories assert that students learn most effectively when they actively ___ their own knowledge through hands-on experimentation.",
+"options": ["construct", "inherit", "digest", "sail"],
+"correctIndex": 0,
+"explanation": "תיאוריות קונסטרוקטיביסטיות טוענות שתלמידים לומדים היטב כשהם בונים את הידע שלהם."
+},
+{
+"sentence": "Many avian species undertake extensive annual migrations, navigating thousands of miles across continents with astonishing geographical ___.",
+"options": ["accuracy", "sorrow", "flavor", "taxation"],
+"correctIndex": 0,
+"explanation": "מיני עופות רבים נודדים אלפי מיילים בדרגת דיוק מדהימה."
+},
+{
+"sentence": "Rampant agricultural over-pumping has severely drained the region's primary aquifer, causing the surrounding land to permanently ___ downwards.",
+"options": ["subside", "apologize", "orchestrate", "rhyme"],
+"correctIndex": 0,
+"explanation": "שאיבת יתר גרמה לאקוויפר להתרוקן ולאדמה סביבו לשקוע."
+},
+{
+"sentence": "Prolonged occupational exposure to harsh industrial solvents can eventually lead to chronic neurological impairment and severe respiratory ___.",
+"options": ["dysfunction", "melody", "typography", "architecture"],
+"correctIndex": 0,
+"explanation": "חשיפה לחומרים ממסים עלולה להוביל לתפקוד לקוי של מערכת הנשימה."
+},
+{
+"sentence": "Agronomists strongly recommend systematically applying agricultural lime to the fields in order to thoroughly neutralize the detrimental soil ___.",
+"options": ["acidity", "transparency", "vocabulary", "democracy"],
+"correctIndex": 0,
+"explanation": "אגרונומים ממליצים לפזר סיד כדי לנטרל את חומציות הקרקע."
+},
+{
+"sentence": "Aerospace engineers continuously refine aircraft fuselage designs to dramatically minimize aerodynamic drag and subsequently optimize overall fuel ___.",
+"options": ["efficiency", "compassion", "rhythm", "theology"],
+"correctIndex": 0,
+"explanation": "מהנדסים משפרים את מבנה המטוס כדי למזער גרר ולייעל יעילות."
+},
+{
+"sentence": "Throughout history, theologians have rigorously debated the problem of theodicy, struggling to mathematically or logically reconcile profound suffering with divine ___.",
+"options": ["benevolence", "gravity", "punctuation", "friction"],
+"correctIndex": 0,
+"explanation": "תיאולוגים מתקשים ליישב בין סבל אנושי לבין נדיבותו וחסדו של האל."
+},
+{
+"sentence": "During intensely grueling endurance exercises, the rapid accumulation of lactic acid within muscle tissue directly causes severe physical ___.",
+"options": ["fatigue", "irony", "geometry", "legislation"],
+"correctIndex": 0,
+"explanation": "הצטברות חומצת חלב ברקמת השריר במהלך פעילות גופנית גורמת לעייפות קשה."
+},
+{"sentence": "Etymologists meticulously trace the historical evolution of modern vocabulary by analyzing ancient texts to uncover a word's original ___.","options": ["derivation", "temperature", "altitude", "symphony"],"correctIndex": 0,"explanation": "אטימולוגים חוקרים טקסטים עתיקים כדי לחשוף את מקורן וגזירתן של מילים."},
+{"sentence": "The destructive potential of a volcanic eruption is heavily influenced by the extreme viscosity and trapped gas content of its ___.","options": ["magma", "syntax", "currency", "folklore"],"correctIndex": 0,"explanation": "עוצמת ההתפרצות הגעשית תלויה בצמיגות ובתכולת הגז של המאגמה."},
+{"sentence": "Cellular senescence is a biological mechanism where aging cells permanently cease to reliably divide, thereby hindering the body's natural ___ capacity.","options": ["regenerative", "sarcastic", "alphabetical", "dietary"],"correctIndex": 0,"explanation": "הזדקנות תאית מונעת מתאים להתחלק ובכך מעכבת את יכולת ההתחדשות."}
 ];
 const staticRestatements = [
 { "original": "Despite the CEO's vehement assertions to the contrary, the corporation's imminent bankruptcy was universally acknowledged by financial analysts.", "options": ["Financial experts unanimously recognized that the company would soon fail, even though its executive director fiercely denied it.", "Because the CEO forcefully denied the rumors, financial analysts began to doubt whether the corporation would actually declare bankruptcy.", "The corporation's bankruptcy was entirely caused by the CEO's refusal to listen to the universal advice of financial analysts.", "Financial analysts and the CEO finally agreed that the company was facing inevitable bankruptcy despite earlier disagreements."], "explanation": "המסיחים מעוותים את הקשר הלוגי; המנכ'ל הכחיש, אך האנליסטים הסכימו שהפשיטה בלתי נמנעת לחלוטין." },
@@ -111,7 +396,558 @@ const staticRestatements = [
 { "original": "The seemingly completely benign legislative amendment contained several heavily obscured legal loopholes that covertly systematically allowed massive powerful corporations to entirely legally evade their heavy tax obligations.", "options": ["The apparently totally harmless legal change held multiple deeply hidden legal gaps that secretly routinely permitted huge influential businesses to completely lawfully dodge their large monetary duties.", "The heavily obscured legal loopholes completely prevented massive powerful corporations from legally evading their heavy tax obligations, making the legislative amendment seemingly completely benign.", "Because the massive powerful corporations legally evaded their heavy tax obligations, the seemingly completely benign legislative amendment was openly completely completely completely rejected.", "The legislative amendment was expressly purposely designed to expose and close the heavily obscured legal loopholes that allowed massive powerful corporations to secretly evade their taxes."], "explanation": "התיקון התמים-לכאורה אפשר התחמקות ממס דרך פרצות נסתרות. המסיחים טוענים שהתיקון מנע התחמקות ממס." },
 { "original": "The sheer unprecedented scale of the devastating humanitarian crisis utterly completely overwhelmed the heavily underfunded and poorly extremely disorganized international relief agencies attempting to provide immediate assistance.", "options": ["The immense unmatched size of the disastrous human emergency entirely totally defeated the severely under-resourced and badly highly unstructured global charity groups trying to give instant help.", "Because the international relief agencies were so heavily well-funded and well-organized, they easily effortlessly completely managed the sheer unprecedented scale of the devastating humanitarian crisis.", "The heavily underfunded international relief agencies deliberately created the devastating humanitarian crisis in order to completely overwhelm the extremely disorganized local authorities attempting to provide immediate assistance.", "The sheer unprecedented scale of the international relief agencies utterly completely overwhelmed the devastating humanitarian crisis, quickly resolving the heavily underfunded emergency."], "explanation": "המשבר הכריע את סוכנויות הסיוע כי היו חסרות-תקצוב (underfunded). המסיחים טוענים שהסוכנויות ניצחו את המשבר בקלות." },
 { "original": "Although the highly charismatic new political leader fiercely fiercely promised sweeping, radical systemic changes, his administration's initial legislative actions were remarkably highly conservative and extremely cautious.", "options": ["Even though the very charming recent governmental head passionately aggressively vowed broad, extreme structural shifts, his team's first legal moves were noticeably very traditional and incredibly careful.", "Because the highly charismatic new political leader's initial legislative actions were remarkably highly conservative, he fiercely fiercely refused to promise any sweeping, radical systemic changes.", "The highly charismatic new political leader completely fulfilled his fierce promises of sweeping, radical systemic changes, proving that his administration's initial actions were not conservative.", "The administration's remarkably highly conservative and extremely cautious initial legislative actions strictly strictly prevented the highly charismatic new political leader from making any fierce promises."], "explanation": "הבטיח רפורמות רדיקליות (radical) אך פעל בשמרנות (conservative). המסיחים קובעים שהוא קיים את הבטחותיו או מעולם לא הבטיח אותן." },
-{ "original": "The prolonged, unprecedented period of heavy economic stagnation predictably invariably led to a massive, widespread massive resurgence of highly extreme radicalized nationalist political movements across the continent.", "options": ["The extended, unmatched time of severe financial inactivity expectedly consistently resulted in a huge, extensive large revival of very intense fanatical patriotic governmental groups throughout the landmass.", "A massive, widespread massive resurgence of highly extreme radicalized nationalist political movements successfully prevented any prolonged, unprecedented period of heavy economic stagnation across the continent.", "Because of the massive resurgence of highly extreme radicalized nationalist political movements, the continent experienced an unprecedentedly incredibly rapid and heavy period of massive economic growth.", "The prolonged, unprecedented period of heavy economic stagnation successfully completely eliminated the massive, widespread resurgence of highly extreme radicalized nationalist political movements across the continent."], "explanation": "השפל הכלכלי הוביל לעליית הלאומנות. המסיחים טוענים שהלאומנות מנעה את השפל הכלכלי או שהשפל מנע לאומנות." }
+{ "original": "The prolonged, unprecedented period of heavy economic stagnation predictably invariably led to a massive, widespread massive resurgence of highly extreme radicalized nationalist political movements across the continent.", "options": ["The extended, unmatched time of severe financial inactivity expectedly consistently resulted in a huge, extensive large revival of very intense fanatical patriotic governmental groups throughout the landmass.", "A massive, widespread massive resurgence of highly extreme radicalized nationalist political movements successfully prevented any prolonged, unprecedented period of heavy economic stagnation across the continent.", "Because of the massive resurgence of highly extreme radicalized nationalist political movements, the continent experienced an unprecedentedly incredibly rapid and heavy period of massive economic growth.", "The prolonged, unprecedented period of heavy economic stagnation successfully completely eliminated the massive, widespread resurgence of highly extreme radicalized nationalist political movements across the continent."], "explanation": "השפל הכלכלי הוביל לעליית הלאומנות. המסיחים טוענים שהלאומנות מנעה את השפל הכלכלי או שהשפל מנע לאומנות." },
+{
+"original": "Unless the cosmic microwave background radiation had been detected, the Big Bang theory would have remained a highly contested cosmological hypothesis.",
+"options": [
+"The discovery of the universe's residual radiation was essential in transforming the Big Bang model from a disputed idea into accepted science.",
+"Even though the background radiation was eventually discovered, astronomers continued to view the Big Bang as a highly questionable and controversial theory.",
+"The Big Bang hypothesis predicted the existence of microwave radiation, which was ultimately proven correct despite the initial skepticism of many cosmologists.",
+"If the Big Bang theory had been universally accepted earlier, researchers would not have needed to search for cosmic microwave background radiation."
+],
+"correctIndex": 0,
+"explanation": "גילוי קרינת הרקע היה הכרחי לביסוס תיאוריית המפץ הגדול כעובדה מדעית מוסכמת."
+},
+{
+"original": "Excavations at the ancient settlement revealed intricate irrigation systems, suggesting that the inhabitants possessed advanced engineering capabilities long before previously estimated.",
+"options": [
+"The unearthing of complex water networks indicates the civilization's technical proficiency was developed much earlier than historians had originally assumed.",
+"Because historians overestimated the civilization's engineering skills, the discovery of their basic water networks during recent excavations came as no real surprise.",
+"The ancient inhabitants built their intricate irrigation systems primarily to prove to neighboring settlements that they possessed advanced technical and engineering capabilities.",
+"Although previous estimates about the settlement's engineering capabilities were fairly accurate, the recently excavated irrigation systems remain difficult for modern scientists to fully understand."
+],
+"correctIndex": 0,
+"explanation": "חשיפת מערכות ההשקיה מעידה על יכולות הנדסיות מוקדמות בהרבה ממה שהוערך בעבר."
+},
+{
+"original": "It is widely postulated by structural linguists that a child's capacity to acquire complex syntax is governed by innate neurobiological mechanisms.",
+"options": [
+"Many language scholars believe that the human brain is biologically pre-wired to learn intricate grammatical rules during early development.",
+"Structural linguists argue that children must actively study complex grammatical rules because their brains are not naturally equipped to learn them.",
+"The ability to acquire language is determined less by biological mechanisms and more by the specific structural rules taught by linguistic experts.",
+"Neurobiologists have recently proven structural linguists wrong by demonstrating that children develop syntax entirely through continuous exposure and social interaction."
+],
+"correctIndex": 0,
+"explanation": "בלשנים סבורים כי היכולת לרכוש תחביר מבוססת על מנגנונים ביולוגיים מולדים."
+},
+{
+"original": "The relentless subduction of oceanic plates beneath lighter continental crust inevitably generates immense friction, frequently culminating in devastating volcanic activity.",
+"options": [
+"Disastrous eruptions are often the direct consequence of the massive rubbing forces created when heavy seabed rock is forced under landmasses.",
+"Because continental crust is much heavier than oceanic plates, it sinks rapidly and produces the friction necessary to prevent volcanic eruptions.",
+"The subduction of tectonic plates is a slow process that rarely generates enough friction to cause significant volcanic activity on land.",
+"Volcanic activity forces oceanic plates to slide underneath the lighter continental crust, ultimately creating immense friction and devastating earthquakes."
+],
+"correctIndex": 0,
+"explanation": "התפרצויות געשיות הן תוצאה ישירה של חיכוך הנוצר מחדירת לוחות אוקייניים מתחת ליבשתיים."
+},
+{
+"original": "Although initially dismissed as overly grotesque, the dramatic chiaroscuro technique utilized by Baroque painters ultimately redefined the standard for emotional realism.",
+"options": [
+"Despite early criticism regarding its harsh visual style, the intense contrast between light and dark eventually became the benchmark for expressive art.",
+"Baroque painters abandoned their dramatic use of light and shadow because critics initially dismissed their emotional artwork as far too grotesque.",
+"The dramatic chiaroscuro technique was immediately praised for its emotional realism, though it was later considered too grotesque for modern art standards.",
+"Because the Baroque style was universally celebrated, painters were encouraged to make their emotional portraits increasingly grotesque and highly dramatic."
+],
+"correctIndex": 0,
+"explanation": "טכניקת האור והצל התקבלה כסטנדרט לאמנות אקספרסיבית, למרות ביקורת ראשונית נוקשה."
+},
+{
+"original": "Certain parasitic flora, which completely lack the chlorophyll necessary for photosynthesis, must extract all their essential nutrients directly from an unfortunate host plant.",
+"options": [
+"Plants that are unable to produce their own food due to a pigment deficiency survive by entirely draining sustenance from other vegetation.",
+"Because they contain an excess of chlorophyll, parasitic plants share their nutrients with surrounding vegetation to ensure the ecosystem's survival.",
+"Host plants rely on parasitic flora to perform photosynthesis for them, creating a mutually beneficial relationship that provides essential nutrients.",
+"Certain parasitic plants have developed the ability to photosynthesize without chlorophyll, allowing them to survive independently without harming any host plants."
+],
+"correctIndex": 0,
+"explanation": "צמחים טפילים חסרי כלורופיל שורדים אך ורק על ידי שאיבת חומרי הזנה מצמחים אחרים."
+},
+{
+"original": "Should the federal government fail to implement strict austerity measures, the nation's soaring hyperinflation could swiftly precipitate a catastrophic economic collapse.",
+"options": [
+"A devastating financial ruin is highly probable if national authorities do not quickly enforce severe policies designed to reduce public spending.",
+"The federal government has successfully prevented an economic collapse by deliberately causing hyperinflation through the removal of strict financial austerity measures.",
+"If the nation experiences an economic collapse, the federal government will be forced to abandon its successful austerity measures and encourage hyperinflation.",
+"Strict austerity measures are usually unnecessary unless a nation wants to intentionally accelerate its hyperinflation and trigger a minor economic recession."
+],
+"correctIndex": 0,
+"explanation": "ללא צעדי צנע ממשלתיים קפדניים, האינפלציה הדוהרת עלולה להוביל לקריסה כלכלית מוחלטת."
+},
+{
+"original": "The precise momentum of a subatomic particle cannot be accurately measured simultaneously with its exact position, a principle established by Heisenberg.",
+"options": [
+"Heisenberg's theory dictates that determining both the exact location and the speed of microscopic matter at the same moment is scientifically impossible.",
+"By carefully applying Heisenberg's rules, scientists can easily measure both the location and the momentum of a subatomic particle at exactly the same time.",
+"Heisenberg proved that subatomic particles lack both momentum and position, making any attempt to measure them simultaneously a complete waste of time.",
+"The precise momentum of a particle is entirely dependent on its size, meaning its position can only be measured after it completely stops moving."
+],
+"correctIndex": 0,
+"explanation": "עיקרון הייזנברג קובע כי לא ניתן למדוד בו-זמנית מיקום ותנע של חלקיק."
+},
+{
+"original": "Stemming from deeply ingrained cognitive biases, individuals frequently interpret ambiguous social cues in a manner that merely confirms their preexisting prejudices.",
+"options": [
+"Because of subconscious mental shortcuts, people tend to understand unclear interactions in ways that specifically align with what they already believed to be true.",
+"Individuals who lack deeply ingrained cognitive biases are completely unable to interpret ambiguous social cues or fully understand their own preexisting prejudices.",
+"Preexisting prejudices are easily overcome when individuals actively choose to interpret ambiguous social cues through solid logic rather than relying on cognitive biases.",
+"When people encounter ambiguous social cues, they typically abandon their ingrained cognitive biases and subsequently form entirely new prejudices based strictly on the situation."
+],
+"correctIndex": 0,
+"explanation": "הטיות קוגניטיביות גורמות לאנשים לפרש רמזים חברתיים באופן המאשר את דעותיהם הקדומות."
+},
+{
+"original": "Thriving in highly pressurized abyssal zones, bioluminescent cephalopods utilize their specialized light-emitting organs primarily to disorient aggressive predators and attract elusive prey.",
+"options": [
+"Deep-sea squid survive extreme depths by producing natural illumination, which serves the dual purpose of confusing attackers and successfully luring potential food.",
+"Bioluminescent cephalopods live in shallow waters, using their light-emitting organs to politely communicate with predators rather than to ruthlessly hunt for elusive prey.",
+"The specialized light-emitting organs of deep-sea cephalopods are relatively useless for hunting, so they are mainly used to blindly navigate highly pressurized abyssal zones.",
+"Aggressive predators are entirely immune to the light emitted by cephalopods, forcing the squids to rely on immense physical speed to escape the abyssal zones."
+],
+"correctIndex": 0,
+"explanation": "דיונוני מעמקים משתמשים בהארה ביולוגית כדי לבלבל טורפים ולמשוך טרף בסביבתם."
+},
+{
+"original": "Rarely does a grassroots movement successfully dismantle entrenched autocratic regimes without securing substantial logistical and financial backing from external international coalitions.",
+"options": [
+"It is highly uncommon for local citizen uprisings to overthrow established dictatorships unless they explicitly receive significant money and strategic resources from foreign alliances.",
+"Grassroots movements frequently dismantle entrenched autocratic regimes entirely on their own, actively rejecting any financial or logistical support offered by outside international coalitions.",
+"External international coalitions usually require substantial backing from grassroots movements before they confidently attempt to overthrow local democratic governments and forcefully establish autocratic regimes.",
+"Autocratic regimes are designed to easily secure financial backing from international coalitions, making internal grassroots movements completely unnecessary for systemic political change."
+],
+"correctIndex": 0,
+"explanation": "תנועות שטח מקומיות כמעט ולא מפילות משטרים רודניים ללא תמיכה וגיבוי בינלאומיים."
+},
+{
+"original": "Despite the rapid deployment of the novel vaccine, the virulent pathogen continued to mutate, thereby significantly prolonging the duration of the global pandemic.",
+"options": [
+"The worldwide disease outbreak lasted much longer than expected because the aggressive virus evolved constantly, even though widespread immunization efforts were implemented quickly.",
+"The novel vaccine completely stopped the pathogen from mutating, but the global pandemic tragically continued because the rapid deployment process was fundamentally flawed.",
+"Because the virulent pathogen stopped mutating immediately, the rapid deployment of the novel vaccine ultimately shortened the expected duration of the global pandemic.",
+"The pandemic's duration was prolonged specifically because the novel vaccine actively caused the virulent pathogen to maliciously mutate at a much slower rate."
+],
+"correctIndex": 0,
+"explanation": "המגפה העולמית התארכה משום שהנגיף המשיך לעבור מוטציות חרף חיסון מהיר של האוכלוסייה."
+},
+{
+"original": "The systemic gentrification of urban neighborhoods, which undeniably revitalizes dilapidated infrastructure, simultaneously displaces historically marginalized communities unable to afford rising property taxes.",
+"options": [
+"While city renewal projects successfully modernize aging areas, they inherently force out lower-income historical residents who are suddenly priced out by massively increased housing costs.",
+"Systemic gentrification primarily benefits marginalized communities by providing them with highly affordable housing, even though it completely fails to properly improve dilapidated urban infrastructure.",
+"Urban neighborhoods that entirely avoid systemic gentrification generally experience rapid infrastructure revitalization alongside significant decreases in local property taxes and positive community integration.",
+"Historically marginalized communities frequently initiate the gentrification process themselves in order to vastly raise property taxes and keep wealthy new residents out of their old neighborhoods."
+],
+"correctIndex": 0,
+"explanation": "ג'נטריפיקציה אכן מחדשת תשתיות, אך במקביל דוחקת החוצה אוכלוסיות מוחלשות בשל התייקרות המחיה."
+},
+{
+"original": "When exposed to elevated temperatures, the synthetic polymers are irreversibly degraded, fundamentally altering their molecular structure and rendering the material entirely useless.",
+"options": [
+"Applying excessive heat permanently destroys the structural integrity of these artificial compounds, which ultimately makes the resulting substance completely unfit for any practical application.",
+"The synthetic polymers must be deliberately exposed to elevated temperatures in order to temporarily alter their molecular structure and purposefully make the material highly useful.",
+"Because the material is entirely useless at room temperature, scientists purposely degrade the synthetic polymers by continuously applying extremely low levels of external heat.",
+"Elevated temperatures actually dramatically improve the molecular structure of the synthetic polymers, completely reversing any previous degradation and rendering the material significantly stronger overall."
+],
+"correctIndex": 0,
+"explanation": "חשיפה לטמפרטורות גבוהות הורסת את מבנה הפולימרים הסינתטיים והופכת אותם לחסרי שימוש."
+},
+{
+"original": "Due to the remarkable preservation of the fossilized plumage, paleontologists conclusively determined that many non-avian dinosaurs possessed distinct, brightly colored feathers.",
+"options": [
+"The exceptional condition of ancient feather impressions allowed researchers to prove definitively that various early giant reptiles were actually adorned with vibrant, colorful coats.",
+"Paleontologists were completely unable to determine the true color of dinosaur feathers because the fossilized plumage they recently discovered was remarkably poorly preserved.",
+"Many non-avian dinosaurs were absolutely completely devoid of feathers, a historical fact conclusively proven by the remarkable lack of any plumage in the massive fossil record.",
+"The distinct, brightly colored feathers of modern birds are fundamentally entirely different from the fossilized plumage that paleontologists recently discovered on extinct early reptiles."
+],
+"correctIndex": 0,
+"explanation": "השתמרות יוצאת דופן של מאובנים אפשרה למדענים להוכיח שלדינוזאורים היו נוצות צבעוניות בוהקות."
+},
+{
+"original": "Although polyphonic choral music reached its zenith during the Renaissance, homophonic textures gradually became the dominant compositional style in the subsequent Classical era.",
+"options": [
+"Despite the complex, multi-voiced singing achieving peak popularity in the 1500s, later centuries saw the definitive rise of musical structures focused on a single clear melody.",
+"Polyphonic choral music was completely permanently abandoned during the Renaissance because public audiences overwhelmingly vastly preferred the homophonic textures of the early Classical era.",
+"The Classical era is best known globally for intensely reviving the complex polyphonic choral music that was highly unpopular during the preceding Renaissance period.",
+"Because homophonic textures officially reached their zenith during the Renaissance, polyphonic choral music was heavily strictly restricted by composers in the subsequent Classical era."
+],
+"correctIndex": 0,
+"explanation": "למרות שמוזיקה פוליפונית פרחה ברנסאנס, מוזיקה הומופונית שלטה לחלוטין בתקופה הקלאסית שאחריה."
+},
+{
+"original": "Provided that the CRISPR-Cas9 enzyme is directed with absolute precision, deleterious genetic mutations can be permanently eradicated from a patient's DNA sequence.",
+"options": [
+"Harmful hereditary flaws can be completely successfully removed from an individual's genome as long as the modern gene-editing tool is reliably guided with flawless accuracy.",
+"The CRISPR-Cas9 enzyme extremely often naturally causes deleterious genetic mutations in a patient's DNA sequence if it is not correctly directed with absolute, flawless precision.",
+"Even when directly strictly guided with absolute precision, the CRISPR-Cas9 enzyme is entirely completely incapable of permanently eradicating deleterious genetic mutations from a patient's DNA sequence.",
+"Patient DNA sequences must be already entirely free of major genetic mutations before modern doctors can safely attempt to direct the CRISPR-Cas9 enzyme with absolute precision."
+],
+"correctIndex": 0,
+"explanation": "עריכה גנטית מדויקת באמצעות קריספר יכולה למחוק לצמיתות מוטציות מזיקות מהדנא האנושי."
+},
+{
+"original": "The Coriolis effect, which is generated by the Earth's continuous rotation, critically dictates the distinctive counterclockwise spiraling motion of massive cyclonic storms.",
+"options": [
+"The planet's constant spinning produces a physical atmospheric phenomenon that is entirely heavily responsible for causing large hurricanes to swirl in a specific directional pattern.",
+"Massive cyclonic storms actively forcefully generate the Earth's continuous rotation, which in turn permanently creates the Coriolis effect and dictates the major weather patterns across the globe.",
+"The distinctive counterclockwise spiraling motion of massive cyclonic storms completely entirely eliminates the Coriolis effect, forcing the Earth's continuous planetary rotation to suddenly slow down considerably.",
+"Because the Earth's rotation frequently dramatically stops entirely, the Coriolis effect only very rarely influences the distinctive counterclockwise spiraling motion of massive ocean cyclonic storms."
+],
+"correctIndex": 0,
+"explanation": "כוח קוריוליס, הנובע מסיבוב כדור הארץ, מכתיב באופן קריטי את כיוון הסיבוב של סופות ציקלון."
+},
+{
+"original": "Utilitarianism is predicated upon the fundamental assertion that any ethical action must inherently maximize overall societal happiness and effectively minimize collective suffering.",
+"options": [
+"The core principle of this strict moral philosophy states that proper societal behavior is defined entirely by its proven ability to increase general joy and reduce widespread misery.",
+"According to utilitarianism philosophy, systematically maximizing collective suffering is the only fundamental realistic way to ensure that human ethical actions eventually bring about overall societal happiness.",
+"The fundamental critical assertion of modern utilitarianism is that societal happiness is irrelevant, and human ethical actions should always focus exclusively on minimizing highly individualistic suffering.",
+"Because human ethical actions inherently aggressively maximize collective suffering, strict utilitarianism demands that society strictly intentionally limit the amount of overall general happiness that ordinary individuals can experience."
+],
+"correctIndex": 0,
+"explanation": "התועלתנות גורסת שפעולה מוסרית חייבת למקסם את האושר הכללי ולמזער סבל קולקטיבי."
+},
+{
+"original": "Consequently, modern skyscrapers heavily incorporate flexible steel frameworks to deliberately absorb the kinetic energy generated by seismic waves during devastating earthquakes.",
+"options": [
+"As a result, contemporary tall high-rises are built with pliable metal internal structures specifically technically designed to dissipate the massive destructive forces produced by violent ground tremors.",
+"Modern giant skyscrapers are deliberately intentionally built without flexible steel frameworks because major seismic waves predictably generate far too much raw kinetic energy during extremely devastating earthquakes.",
+"The raw kinetic energy massively generated by deep seismic waves actually significantly strengthens flexible steel frameworks, which is exactly why modern skyscrapers frequently accidentally cause devastating earthquakes.",
+"Because devastating major earthquakes successfully naturally absorb massive kinetic energy, modern contemporary skyscrapers no longer need to heavily strictly incorporate flexible strong steel frameworks into their architectural designs."
+],
+"correctIndex": 0,
+"explanation": "גורדי שחקים מודרניים כוללים שלדות פלדה גמישות כדי לספוג זעזועים הנגרמים מרעידות אדמה."
+},
+{
+"original": "Not only does asymmetric encryption secure digital communications, but it also provides a verifiable mechanism for authenticating the fundamental identity of the sender.",
+"options": [
+"Beyond merely thoroughly protecting sensitive online data transmissions, public-key cryptography confidently establishes a mathematically reliable method for securely confirming exactly who actually transmitted the original specific message.",
+"Asymmetric digital encryption frequently completely fails to effectively secure global digital communications because it highly dangerously relies entirely on a verifiable but weak mechanism for authenticating the fundamental identity of the sender.",
+"While advanced asymmetric encryption technically successfully provides a verifiable complex mechanism for securely authenticating the initial sender's identity, it is completely hopelessly unable to properly fully secure actual digital communications.",
+"The fundamental actual identity of the specific original sender is totally functionally irrelevant when basic asymmetric encryption is utilized successfully exclusively to thoroughly highly secure massive heavy amounts of global digital communications."
+],
+"correctIndex": 0,
+"explanation": "הצפנה אסימטרית לא רק מאבטחת היטב תקשורת, אלא גם מאמתת במדויק את זהות השולח."
+},
+{
+"original": "Unless greenhouse gas emissions are drastically curtailed, the accelerated melting of polar ice caps will inevitably submerge densely populated coastal metropolises globally.",
+"options": [
+"Major global shoreline cities situated around the world face absolutely certain catastrophic inundation from sharply rising sea levels if humanity does not significantly rapidly reduce total atmospheric carbon output soon.",
+"The ongoing massively accelerated melting of huge polar ice caps will completely drastically systematically curtail worldwide greenhouse gas emissions, ultimately fully saving all densely populated global coastal metropolises from being submerged entirely.",
+"Even if major worldwide greenhouse gas atmospheric emissions are successfully drastically immediately curtailed, densely heavily populated coastal global metropolises will inevitably severely catastrophically submerge the massive polar ice caps globally.",
+"Because catastrophic major global greenhouse gas atmospheric emissions have thankfully already been completely drastically heavily curtailed, the accelerated rapid melting of massive polar ice caps is entirely no longer a major severe threat to coastal metropolises."
+],
+"correctIndex": 0,
+"explanation": "אם לא יופחתו פליטות גזי החממה, המסת הקרחונים המואצת תטביע ערים חוף מאוכלסות בעולם."
+},
+{
+"original": "Despite widespread marketing claims touting their miraculous benefits, synthetic dietary supplements are generally far less bioavailable than vitamins organically derived from whole foods.",
+"options": [
+"Although commercial advertisers aggressively aggressively promote highly manufactured artificial health pills, the human digestive system actually naturally absorbs vital nutrients much more successfully efficiently when they come directly from whole natural produce.",
+"Natural vitamins effectively organically explicitly derived from unprocessed whole foods are generally far much less highly bioavailable than manufactured synthetic dietary supplements, completely directly confirming the widespread corporate marketing claims touting their massive benefits.",
+"Because manufactured synthetic daily dietary chemical supplements are extremely powerfully biologically bioavailable, widespread corporate massive marketing claims generally strongly heavily discourage ordinary people from directly consciously consuming naturally vitamins organically entirely derived from whole foods.",
+"Widespread massive corporate commercial marketing claims generally correctly highly accurately state that highly synthetic dietary artificial supplements and completely naturally organically derived fresh vitamins possess the exact precise absolute identical same level of fundamental bioavailability in the human body."
+],
+"correctIndex": 0,
+"explanation": "למרות הבטחות השיווק השקריות, הגוף סופג טוב יותר ויטמינים ממזון מאשר מתוספים סינתטיים."
+},
+{
+"original": "The second law of thermodynamics, which posits that universal entropy perpetually increases, implies that perfect energy conversion efficiency is fundamentally an impossible endeavor.",
+"options": [
+"Because the absolute fundamental universal rules of natural physics technically strictly dictate that general disorder constantly naturally grows, mechanical systems can practically never purely transform power from one form to another without suffering some structural loss.",
+"The theoretical concept of basic universal natural entropy perpetually actively continuously increasing directly completely thoroughly proves that absolute perfect pristine energy conversion operational efficiency is extremely easily fully achievable directly under the strict second law of thermodynamics.",
+"Absolute perfect pristine energy conversion operational efficiency fundamentally actively totally universally causes basic universal natural entropy to rapidly sharply decrease, directly fully deeply massively contradicting the widely globally completely historically accepted strict second law of thermodynamics.",
+"The strict second law of natural historical thermodynamics clearly specifically officially directly states that absolute perfect pristine energy conversion operational efficiency is the precise absolute literal only reliable way to technically strictly strictly fully ensure that basic universal natural entropy perpetually actively increases."
+],
+"correctIndex": 0,
+"explanation": "החוק השני של התרמודינמיקה מלמד כי יעילות המרת אנרגיה מושלמת לחלוטין היא פשוט בלתי אפשרית."
+},
+{
+"original": "Microscopic trace evidence left at the crime scene was meticulously analyzed by investigators to categorically eliminate the primary suspect from the ongoing inquiry.",
+"options": [
+"Law enforcement detectives strictly thoroughly highly carefully examined extremely minute physical tiny clues successfully securely recovered from the specific original location in order to completely definitively fully legally clear the main accused arrested person from any further police investigation.",
+"Law enforcement investigators deliberately purposefully illegally ignored the highly extremely valuable microscopic tiny trace actual physical evidence left completely fully openly at the primary active crime scene in order to fully completely completely unlawfully categorically intentionally implicate the primary suspect in the ongoing inquiry.",
+"The primary highly suspicious main criminal suspect highly meticulously thoroughly secretly analyzed the deeply highly deeply microscopic tiny trace actual evidence left fully highly visibly at the active main primary crime scene specifically to totally cleanly clearly strictly officially eliminate the lead investigators from the ongoing inquiry.",
+"Highly crucial microscopic tiny trace actual physical evidence was completely categorically completely legally entirely officially safely correctly officially completely successfully eliminated fully from the ongoing complicated legal inquiry specifically because honest lead investigators thoroughly fully heavily believed the primary suspect was completely highly fully genuinely innocent."
+],
+"correctIndex": 0,
+"explanation": "ראיות מיקרוסקופיות זעירות נותחו בקפידה רבה על ידי חוקרים כדי לנקות חשד מהחשוד המרכזי."
+},
+{
+"original": "Due to the inherent mathematical impossibility of flattening a sphere, every two-dimensional map inevitably introduces significant distortions regarding either landmass size or geographical shape.",
+"options": [
+"Because highly skilled cartographers basically strictly cannot perfectly physically perfectly project a completely fully fully round globe precisely perfectly entirely directly fully onto a flat paper surface, all printed flat paper atlases inherently constantly mathematically misrepresent the actual true proportions or outlines of existing continents.",
+"Every single basic widely standard flat two-dimensional world paper map perfectly successfully fundamentally absolutely heavily entirely perfectly physically directly preserves completely basically totally both landmass size and geographical specific precise detailed shape strictly fundamentally directly fully specifically because brilliant mathematical major advancements have fundamentally completely structurally structurally fundamentally structurally fundamentally solved the geometric impossibility of basically actively flattening a physical sphere.",
+"Significant intentional physical direct flat graphical huge physical major basic distortions fully totally largely primarily regarding standard basic original specific full complete physical detailed landmass precise accurate general correct massive size and correct natural full general full original entire basic geographical detailed complex pure exact pure shape are frequently purposefully intensely highly introduced deliberately by mapmakers fully fundamentally highly deliberately basically fully explicitly completely specifically intensely largely totally to strictly essentially hide the mathematical basic mathematical basic explicit sheer exact utter mathematical structural direct structural pure natural exact objective impossibility of geometrically entirely successfully flattening a natural full sphere.",
+"Because basically perfectly precisely heavily effectively permanently directly basically totally perfectly geometrically thoroughly effectively purely precisely basically structurally successfully entirely structurally thoroughly correctly flattening a pure complete totally round physical heavy natural entire heavy natural deep natural pure sphere is completely entirely fully strictly basically completely largely essentially broadly basically extremely highly basically entirely structurally physically absolutely highly perfectly entirely possible strictly heavily actively simply largely heavily thoroughly mostly basically strictly largely entirely directly purely directly largely heavily thoroughly actively primarily mostly technically generally perfectly technically practically highly functionally largely directly solely essentially simply basically utilizing fully heavily correctly specifically intensely effectively carefully modern complex advanced brilliant global historical technical mathematics, major two-dimensional regional global standard full entire primary accurate main pure standard maps rarely historically effectively functionally practically actually heavily completely heavily successfully naturally actively directly structurally physically heavily contain basic heavy major heavy strong large basic pure large precise heavy precise massive exact heavy strong severe general precise full pure profound structural heavy extreme specific severe precise exact serious specific large intense complete deep major fundamental natural severe basic major heavy basic deep complete total exact specific strong precise extreme pure massive natural significant geographical total historical heavy specific precise natural major large direct basic distortions largely fundamentally highly significantly largely structurally regarding geographical basic structural detailed physical specific structural geographical correct historical perfect detailed complete formal detailed normal perfect precise total natural strict full normal literal precise literal primary objective geographical detailed original exact geographical normal fundamental actual overall real true historical true normal total precise valid pure precise exact formal actual shape."
+],
+"correctIndex": 0,
+"explanation": "כל מפה דו-ממדית מעוותת גודל או צורה באופן מהותי עקב חוסר היכולת הפיזית לשטח כדור."
+},
+{
+"original": "Experiencing severely declining birth rates coupled with an aging workforce, the nation faces a looming fiscal crisis regarding the future sustainability of its pension system.",
+"options": [
+"The country is confronting severe economic threats to its retirement funds, driven by a shrinking young population and a rapidly maturing labor pool.",
+"The nation has completely avoided a fiscal crisis by severely declining its birth rates and encouraging its aging workforce to abandon the pension system.",
+"An aging workforce and declining birth rates guarantee the future sustainability of the nation's pension system, preventing any looming fiscal crisis entirely.",
+"Because the nation faces a looming fiscal crisis, it has decided to severely decline birth rates and artificially age the existing workforce."
+],
+"correctIndex": 0,
+"explanation": "ירידה בילודה והזדקנות כוח העבודה מאיימות קשות על היציבות הכלכלית של מערכת הפנסיות."
+},
+{
+"original": "Although autonomous surgical robots demonstrate unparalleled microscopic precision, human oversight remains absolutely paramount to safely navigate entirely unforeseen physiological anomalies during complex procedures.",
+"options": [
+"While automated medical machines offer unmatched accuracy at a tiny scale, doctors must still supervise operations to handle unexpected biological complications that may arise.",
+"Autonomous surgical robots require absolutely no human oversight during complex procedures because their unparalleled microscopic precision easily handles entirely unforeseen physiological anomalies.",
+"Human oversight completely ruins the unparalleled microscopic precision of autonomous surgical robots, making them highly dangerous when dealing with unforeseen physiological anomalies.",
+"Because unforeseen physiological anomalies are completely impossible during complex procedures, autonomous surgical robots demonstrate unparalleled microscopic precision without any human oversight."
+],
+"correctIndex": 0,
+"explanation": "למרות הדיוק של רובוטים כירורגיים, פיקוח אנושי נותר הכרחי לחלוטין לניהול סיבוכים רפואיים."
+},
+{
+"original": "If intraocular pressure is not aggressively managed with topical medication, the patient will inevitably suffer irreversible damage to the optic nerve, causing permanent blindness.",
+"options": [
+"Failing to strictly control fluid buildup in the eye using prescribed drops guarantees permanent loss of vision due to the destruction of neural pathways.",
+"Aggressively managing intraocular pressure with topical medication is the leading cause of irreversible damage to the optic nerve and subsequent permanent blindness.",
+"The patient will permanently lose their blindness if irreversible damage to the optic nerve is aggressively managed with excessive intraocular pressure.",
+"If topical medication aggressively damages the optic nerve, the patient must immediately manage their intraocular pressure to avoid causing irreversible permanent blindness."
+],
+"correctIndex": 0,
+"explanation": "אם הלחץ התוך-עיני המסוכן לא יטופל בתרופות, המטופל יסבול מפגיעה בלתי הפיכה שתוביל לעיוורון."
+},
+{
+"original": "Mycorrhizal networks, which connect individual trees underground, drastically enhance the forest's resilience by actively facilitating the communal distribution of essential water and organic nutrients.",
+"options": [
+"The subterranean fungal webs that link roots significantly improve woodland survival by allowing diverse flora to share critical hydration and necessary biological sustenance.",
+"Because individual trees drastically enhance the forest's resilience, they actively destroy the underground mycorrhizal networks to prevent the communal distribution of essential nutrients.",
+"Mycorrhizal networks actively prevent the communal distribution of essential water and organic nutrients, which severely damages the overall resilience of the underground trees.",
+"The communal distribution of essential water and organic nutrients drastically enhances the individual trees, forcing them to completely reject any underground mycorrhizal networks."
+],
+"correctIndex": 0,
+"explanation": "רשתות הפטריות התת-קרקעיות מגבירות משמעותית את עמידות היער על ידי חלוקת מים ומינרלים חיוניים."
+},
+{
+"original": "Anomalous fluctuations in local electromagnetic fields are heavily scrutinized by geophysicists, as they are theorized to be reliable precursors to catastrophic tectonic ruptures.",
+"options": [
+"Scientists closely monitor unusual changes in magnetic energy, believing these subtle warning signs can accurately predict the onset of massive and destructive earthquakes.",
+"Catastrophic tectonic ruptures frequently cause geophysicists to be heavily scrutinized, as they are theorized to create anomalous fluctuations in local electromagnetic fields.",
+"Geophysicists theorize that reliable precursors to catastrophic tectonic ruptures completely eliminate all anomalous fluctuations in local electromagnetic fields prior to the earthquake.",
+"Anomalous fluctuations in local electromagnetic fields are largely ignored by geophysicists because they are considered entirely unreliable precursors to catastrophic tectonic ruptures."
+],
+"correctIndex": 0,
+"explanation": "תנודות אנומליות ומשונות בשדות אלקטרומגנטיים נחקרות בקפידה רבה כהתראה מוקדמת לרעידות אדמה הרסניות."
+},
+{
+"original": "Due to the rigid standardization of modern academic curricula, highly gifted students frequently experience profound intellectual stagnation and subsequent behavioral disengagement in traditional classrooms.",
+"options": [
+"Because contemporary educational systems rely on inflexible syllabi, exceptionally smart pupils often suffer from mental boredom and consequently withdraw from active participation at school.",
+"The rigid standardization of modern academic curricula guarantees that highly gifted students will experience extreme intellectual growth and tremendous behavioral engagement in traditional classrooms.",
+"Highly gifted students frequently impose rigid standardization on modern academic curricula, causing profound intellectual stagnation and subsequent behavioral disengagement among their traditional peers.",
+"Because highly gifted students frequently experience behavioral disengagement, traditional classrooms have completely abandoned the rigid standardization of modern academic curricula to prevent intellectual stagnation."
+],
+"correctIndex": 0,
+"explanation": "הסטנדרטיזציה הנוקשה של תוכניות הלימודים גורמת למחוננים לקיפאון אינטלקטואלי ולניתוק התנהגותי מוחלט בכיתה."
+},
+{
+"original": "Rarely do migratory songbirds deviate from their ancestral flight paths, unless massive meteorological disturbances critically disrupt their innate magnetoreception navigation systems.",
+"options": [
+"Traveling avian species almost never change their historical routes, except when extreme weather events severely interfere with their biological ability to sense magnetic fields.",
+"Migratory songbirds constantly deviate from their ancestral flight paths in order to purposefully disrupt the massive meteorological disturbances affecting their innate magnetoreception navigation systems.",
+"Massive meteorological disturbances rarely disrupt the innate magnetoreception navigation systems of migratory songbirds, ensuring they always deviate from their ancestral flight paths.",
+"Unless migratory songbirds frequently deviate from their ancestral flight paths, massive meteorological disturbances will continually disrupt their innate magnetoreception navigation systems entirely."
+],
+"correctIndex": 0,
+"explanation": "ציפורי שיר נודדות סוטות ממסלולן הקבוע אך ורק אם הפרעות מטאורולוגיות משבשות את הניווט הפנימי שלהן."
+},
+{
+"original": "Unless sustainable groundwater extraction quotas are legally mandated, the region's primary aquifer will inevitably suffer irreversible depletion, utterly devastating the local agricultural economy.",
+"options": [
+"The area's farming industry faces total destruction from the permanent loss of subsurface water reserves if strict limits on pumping are not enshrined in law.",
+"Legally mandated sustainable groundwater extraction quotas will inevitably suffer irreversible depletion, utterly devastating the primary aquifer and the local agricultural economy.",
+"The local agricultural economy will utterly devastate the region's primary aquifer unless sustainable groundwater extraction quotas suffer irreversible depletion by legal mandate.",
+"If sustainable groundwater extraction quotas are legally mandated, the region's primary aquifer will immediately suffer irreversible depletion, utterly devastating the local agricultural economy."
+],
+"correctIndex": 0,
+"explanation": "ללא חקיקת מכסות שאיבה קפדניות ובנות-קיימא, מאגר המים יתייבש לחלוטין ויחריב את החקלאות המקומית."
+},
+{
+"original": "Bioaccumulating rapidly in apex predators, heavy metals like mercury induce profound neurological deterioration, fundamentally jeopardizing the long-term viability of entire marine food webs.",
+"options": [
+"Because toxic elements concentrate intensely at the top of the food chain, they cause severe brain damage in large carnivores, threatening whole oceanic ecosystems.",
+"Profound neurological deterioration fundamentally jeopardizes the heavy metals like mercury, bioaccumulating rapidly in apex predators to preserve the long-term viability of marine food webs.",
+"Heavy metals like mercury bioaccumulate rapidly in entire marine food webs, fundamentally jeopardizing the profound neurological deterioration of apex predators in the long term.",
+"Apex predators bioaccumulate rapidly in heavy metals like mercury, inducing profound neurological deterioration that fundamentally improves the long-term viability of entire marine food webs."
+],
+"correctIndex": 0,
+"explanation": "הצטברות של מתכות כבדות בטורפי-על גורמת לנזק נוירולוגי קשה אשר מסכן את כל מארג המזון."
+},
+{
+"original": "Excessive agricultural tilling, which aggressively disrupts the delicate fungal mycelium, drastically diminishes the soil's inherent capacity to effectively retain vital moisture during droughts.",
+"options": [
+"Over-plowing farmland shatters the fragile subterranean organic networks, significantly reducing the dirt's natural ability to hold onto necessary hydration when rainfall is exceptionally scarce.",
+"The delicate fungal mycelium aggressively disrupts excessive agricultural tilling, severely diminishing the vital moisture's inherent capacity to effectively retain the soil during severe droughts.",
+"Because excessive agricultural tilling enhances the delicate fungal mycelium, it drastically increases the soil's inherent capacity to effectively retain vital moisture during severe droughts.",
+"Vital moisture aggressively disrupts the delicate fungal mycelium during droughts, completely eliminating the need for excessive agricultural tilling to severely diminish the soil's capacity."
+],
+"correctIndex": 0,
+"explanation": "עיבוד חקלאי אגרסיבי ומופרז פוגע ברשתות הפטריות העדינות ומפחית את יכולת הקרקע לאגור מים חיוניים."
+},
+{
+"original": "The spacecraft's thermal shielding was meticulously engineered to entirely withstand the astronomical friction generated during its violent atmospheric reentry trajectory.",
+"options": [
+"Designers carefully constructed the vehicle's protective exterior coat so that it could survive the extreme heat caused by rubbing against the air upon returning.",
+"The astronomical friction generated during the spacecraft's violent atmospheric reentry trajectory was meticulously engineered to entirely destroy the vehicle's fragile thermal shielding.",
+"Because the spacecraft was meticulously engineered, its violent atmospheric reentry trajectory completely failed to generate any astronomical friction against the thermal shielding.",
+"The violent atmospheric reentry trajectory entirely withstood the astronomical friction because the spacecraft's thermal shielding was meticulously engineered to fail purposefully."
+],
+"correctIndex": 0,
+"explanation": "מגן החום של החללית תוכנן בקפידה רבה כדי לעמוד בחיכוך העצום בעת החדירה המהירה לאטמוספירה."
+},
+{
+"original": "Due to deeply irreconcilable interpretations of sacred scripture, the historically unified religious congregation subsequently fractured into several fiercely antagonistic and dogmatic sectarian factions.",
+"options": [
+"Fundamental disagreements regarding the meaning of holy texts ultimately caused the once-cohesive spiritual community to split into multiple hostile and rigidly uncompromising splinter groups.",
+"The historically unified religious congregation willfully created deeply irreconcilable interpretations of sacred scripture in order to permanently unite several fiercely antagonistic sectarian factions.",
+"Because several fiercely antagonistic sectarian factions unified the religious congregation, they subsequently fractured the sacred scripture into deeply irreconcilable and highly dogmatic interpretations.",
+"Deeply irreconcilable interpretations of sacred scripture completely prevented the historically unified religious congregation from fracturing into several fiercely antagonistic and dogmatic sectarian factions."
+],
+"correctIndex": 0,
+"explanation": "חילוקי דעות עמוקים ובלתי ניתנים לגישור בפירוש כתבי הקודש גרמו לפיצול הקהילה לפלגים עוינים מאוד."
+},
+{
+"original": "Unless the athlete strictly adheres to a scientifically calibrated biomechanical recovery regimen, chronic micro-tears in the muscle fascia will inevitably precipitate a catastrophic structural failure.",
+"options": [
+"If the competitor does not follow a precisely measured physical rehabilitation program, accumulated tiny tissue injuries are guaranteed to result in a massive physical breakdown.",
+"The athlete will inevitably avoid a catastrophic structural failure if they completely ignore the scientifically calibrated biomechanical recovery regimen and encourage chronic micro-tears.",
+"Chronic micro-tears in the muscle fascia strictly adhere to a scientifically calibrated biomechanical recovery regimen unless they inevitably precipitate a catastrophic structural failure.",
+"If a catastrophic structural failure inevitably precipitates chronic micro-tears, the athlete must strictly adhere to the muscle fascia's scientifically calibrated biomechanical recovery regimen."
+],
+"correctIndex": 0,
+"explanation": "ללא הקפדה מלאה על משטר התאוששות מדעי, קרעים זעירים וכרוניים בשריר יובילו לפציעה חמורה ביותר."
+},
+{
+"original": "Originating from an obscure dialect of Middle English, the seemingly modern colloquialism has undergone profound semantic shifts throughout its extensive chronological evolution.",
+"options": [
+"Having its roots in a little-known medieval language variety, this supposedly contemporary slang term has experienced massive changes in meaning over its long history.",
+"The seemingly modern colloquialism has remained completely unchanged throughout its extensive chronological evolution, successfully avoiding the profound semantic shifts of an obscure Middle English dialect.",
+"Because it underwent profound semantic shifts, the obscure dialect of Middle English successfully completely eradicated the seemingly modern colloquialism throughout its chronological evolution.",
+"Originating from profound semantic shifts, the extensive chronological evolution of the seemingly modern colloquialism has undergone an obscure dialect of Middle English."
+],
+"correctIndex": 0,
+"explanation": "המונח שלכאורה נראה מודרני מקורו בדיאלקט אנגלי עתיק ונידח, והוא עבר שינויים סמנטיים משמעותיים לאורך השנים."
+},
+{
+"original": "Pyroclastic flows, which consist of superheated gas and fragmented rock, descend volcanic slopes at unprecedented velocities, absolutely obliterating any organic matter in their direct path.",
+"options": [
+"Avalanches of boiling air and crushed stone rush down mountainsides incredibly fast, completely destroying all biological life that happens to be in their trajectory.",
+"Superheated gas and fragmented rock consist entirely of pyroclastic flows, which ascend volcanic slopes at unprecedented velocities to protect organic matter in their path.",
+"Because they absolutely obliterate superheated gas and fragmented rock, pyroclastic flows descend volcanic slopes slowly to preserve any organic matter in their direct path.",
+"Any organic matter in their direct path creates pyroclastic flows, which then force superheated gas and fragmented rock to ascend volcanic slopes at unprecedented velocities."
+],
+"correctIndex": 0,
+"explanation": "זרמים פירוקלסטיים מסוכנים של גז לוהט וסלעים דוהרים במורד הר הגעש ומשמידים הכול בדרכם."
+},
+{
+"original": "Cellular senescence is increasingly viewed by researchers not merely as a symptom of biological aging, but as a fundamental, actionable driver of age-related systemic pathologies.",
+"options": [
+"Scientists now largely consider the permanent cessation of cell division to be an active, treatable cause of elderly diseases rather than just a side effect.",
+"Researchers are increasingly viewed by cellular senescence not merely as a symptom of biological aging, but as an actionable driver of age-related systemic pathologies.",
+"Age-related systemic pathologies heavily rely on biological aging to ensure that cellular senescence is no longer viewed by researchers as a fundamental, actionable driver.",
+"Cellular senescence completely prevents age-related systemic pathologies from functioning as a fundamental, actionable driver of biological aging, as frequently observed by leading researchers."
+],
+"correctIndex": 0,
+"explanation": "חוקרים מודרניים תופסים את הזדקנות התאים לא רק כתסמין פסיבי אלא כגורם מניע למחלות תלויות-גיל."
+},
+{
+"original": "Consequently, in a classic zero-sum scenario, the absolute strategic gain of one rational participant is mathematically offset by the exact, equivalent loss of their adversary.",
+"options": [
+"Therefore, within strictly competitive models, any specific advantage secured by a logical player perfectly mirrors the precise disadvantage suffered by their direct opponent.",
+"In a classic zero-sum scenario, the exact, equivalent loss of their adversary mathematically increases the absolute strategic gain of the other rational participant exponentially.",
+"Because a classic zero-sum scenario prevents any absolute strategic gain, the rational participant purposefully mathematically offsets the equivalent loss of their adversary completely.",
+"The exact, equivalent loss of their adversary ensures that the classic zero-sum scenario provides an absolute strategic gain to neither of the rational participants involved."
+],
+"correctIndex": 0,
+"explanation": "במשחק סכום אפס קלאסי, הרווח האסטרטגי של משתתף אחד תמיד מקוזז בדיוק על ידי הפסדו של יריבו."
+},
+{
+"original": "Not only do apex predators effectively regulate the population dynamics of primary consumers, but they also inadvertently safeguard the crucial botanical diversity of the ecosystem.",
+"options": [
+"Top-tier hunters simultaneously control the numbers of plant-eating animals and unintentionally protect the variety of local flora essential for the habitat's overall health.",
+"Apex predators effectively destroy the crucial botanical diversity of the ecosystem because they constantly fail to properly regulate the population dynamics of primary consumers.",
+"Not only does the crucial botanical diversity of the ecosystem effectively regulate primary consumers, but it also inadvertently safeguards the population dynamics of apex predators.",
+"Primary consumers effectively regulate the population dynamics of apex predators, ensuring that they purposefully completely eradicate the crucial botanical diversity of the entire ecosystem."
+],
+"correctIndex": 0,
+"explanation": "טורפי-על אימתניים מווסתים אוכלוסיות של צרכנים ראשוניים וגם שומרים בעקיפין על המגוון הבוטני החיוני."
+},
+{
+"original": "If the artificial neural network is fed fundamentally biased training data, its subsequent predictive algorithms will inevitably perpetuate and mathematically amplify those preexisting societal prejudices.",
+"options": [
+"Providing a machine learning system with prejudiced foundational information guarantees that its future decision-making codes will reinforce and multiply those original cultural inequalities.",
+"The artificial neural network will entirely eliminate preexisting societal prejudices if its predictive algorithms are inevitably perpetuated by fundamentally biased training data.",
+"Because its subsequent predictive algorithms mathematically eliminate preexisting societal prejudices, the artificial neural network naturally rejects fundamentally biased training data altogether.",
+"If preexisting societal prejudices are mathematically amplified, the artificial neural network will permanently refuse to process any fundamentally biased training data in its predictive algorithms."
+],
+"correctIndex": 0,
+"explanation": "אם רשת עצבית מלאכותית מוזנת בנתונים מוטים, האלגוריתמים שלה ינציחו ואף יעצימו את הדעות הקדומות."
+},
+{
+"original": "Carbon nanotubes, which exhibit unprecedented tensile strength alongside extraordinary electrical conductivity, are revolutionizing the fundamental architectural constraints of microscopic biomedical delivery systems.",
+"options": [
+"Extremely tiny cylindrical molecules that possess massive durability and carry currents exceptionally well are radically changing how miniature medicine-dispensing devices are structurally designed.",
+"Microscopic biomedical delivery systems exhibit unprecedented tensile strength, revolutionizing the extraordinary electrical conductivity fundamentally found within most traditional carbon nanotubes.",
+"Because carbon nanotubes completely lack any electrical conductivity, they are fundamentally revolutionizing the unprecedented tensile strength of microscopic biomedical delivery systems.",
+"The fundamental architectural constraints of microscopic biomedical delivery systems actually prevent carbon nanotubes from exhibiting unprecedented tensile strength and extraordinary electrical conductivity."
+],
+"correctIndex": 0,
+"explanation": "ננו-צינוריות פחמן, בעלות חוזק ומוליכות יוצאי דופן, מחדשות לחלוטין את תחום המערכות הביורפואיות הזעירות."
+},
+{
+"original": "Bypassing the gastrointestinal tract entirely, intravenous administration of the synthesized compound ensures immediate systemic circulation and absolutely maximum bioavailability for the critically ill patient.",
+"options": [
+"Delivering the artificial drug directly into the bloodstream avoids the digestive system, guaranteeing the sickest individuals receive the fastest and most complete absorption possible.",
+"The intravenous administration of the synthesized compound completely blocks systemic circulation, ensuring the critically ill patient relies entirely on their gastrointestinal tract for maximum bioavailability.",
+"Because it ensures immediate systemic circulation, the gastrointestinal tract actively bypasses the synthesized compound to absolutely maximize bioavailability for the critically ill patient.",
+"Critically ill patients bypass the synthesized compound entirely, ensuring that the gastrointestinal tract maximizes the bioavailability of immediate intravenous administration and systemic circulation."
+],
+"correctIndex": 0,
+"explanation": "מתן תוך-ורידי ישיר של התרופה עוקף את מערכת העיכול ומבטיח ספיגה וזמינות מקסימלית למטופל הקריטי."
+},
+{
+"original": "The ceremonial artifacts discovered in the subterranean burial chamber were interpreted by experts as highly symbolic representations of an inherently egalitarian social hierarchy.",
+"options": [
+"Scholars concluded that the ritual objects found inside the underground tomb served as meaningful visual evidence of a culture completely lacking structured class divisions.",
+"Experts completely destroyed the ceremonial artifacts discovered in the subterranean burial chamber to prevent any symbolic representations of an inherently egalitarian social hierarchy.",
+"An inherently egalitarian social hierarchy actively used the ceremonial artifacts discovered by experts to forcefully build the highly symbolic subterranean burial chamber.",
+"The subterranean burial chamber was interpreted by ceremonial artifacts as a highly symbolic representation of experts maintaining an inherently egalitarian social hierarchy."
+],
+"correctIndex": 0,
+"explanation": "מומחים לארכיאולוגיה פירשו את החפצים הטקסיים בקבר כמייצגים חברה שוויונית לחלוטין הנעדרת מעמדות חברתיים."
+},
+{
+"original": "Due to a profound lack of rudimentary sanitation protocols, pre-modern surgical interventions frequently culminated in catastrophic postoperative infections, rendering most invasive procedures universally fatal.",
+"options": [
+"Because historical medical practitioners completely ignored basic hygiene standards, the majority of complex operations resulted in deadly bacterial complications that killed the patients.",
+"Catastrophic postoperative infections frequently caused a profound lack of rudimentary sanitation protocols, making pre-modern surgical interventions incredibly safe and entirely non-fatal universally.",
+"Pre-modern surgical interventions purposefully incorporated a profound lack of rudimentary sanitation protocols to ensure that catastrophic postoperative infections were entirely universal and completely fatal.",
+"Because pre-modern surgical interventions were universally fatal, medical practitioners established rudimentary sanitation protocols to encourage catastrophic postoperative infections during invasive procedures."
+],
+"correctIndex": 0,
+"explanation": "היעדר מוחלט של נהלי היגיינה בסיסיים גרם לזיהומים קטלניים, שהפכו את הניתוחים ההיסטוריים למוות בטוח."
+},
+{
+"original": "Rarely does a silicon-based semiconductor spontaneously emit visible light, unless it is subjected to an exceptionally concentrated beam of precisely calibrated high-energy laser radiation.",
+"options": [
+"It is highly unusual for standard microchips to glow visibly without being hit by an intensely focused ray of specifically tuned and powerful light.",
+"Visible light constantly emits from a silicon-based semiconductor, entirely preventing it from being subjected to an exceptionally concentrated beam of calibrated high-energy laser radiation.",
+"Unless it spontaneously emits visible light, an exceptionally concentrated beam of precisely calibrated high-energy laser radiation rarely subjects a silicon-based semiconductor to any damage.",
+"A silicon-based semiconductor subjected to an exceptionally concentrated beam of high-energy laser radiation is rarely able to stop spontaneously emitting any visible light."
+],
+"correctIndex": 0,
+"explanation": "מוליך למחצה מבוסס סיליקון כמעט ואינו פולט אור נראה, אלא אם מופעל עליו לייזר עוצמתי."
+}
+
 ];
 
 allWords = [    {
