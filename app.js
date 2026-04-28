@@ -710,13 +710,35 @@ async function fetchGeminiData(promptText, stepName) {
     });
 
     const data = await response.json();
+    
+    // הגנה 1: בדיקה אם גוגל חסמה את התשובה בגלל מילים "אלימות" בטקסט האקדמי
+    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+        throw new Error(`ה-AI חסם את התשובה (מנגנון בטיחות של גוגל) בשלב: ${stepName}. נסה שוב.`);
+    }
+
     let jsonText = data.candidates[0].content.parts[0].text;
     
+    // ניקוי אגרסיבי של שאריות טקסט מסביב לקוד
     jsonText = jsonText.replace(/^```(json)?\n?/gm, '').replace(/\n?```$/gm, '').trim();
-    const jsonMatch = jsonText.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (jsonMatch) jsonText = jsonMatch[0];
+    const jsonMatch = jsonText.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error(`ה-AI החזיר פורמט שבור בשלב: ${stepName}`);
     
-    return JSON.parse(jsonText.replace(/,\s*([\]}])/g, '$1'));
+    let parsedData = JSON.parse(jsonMatch[0].replace(/,\s*([\]}])/g, '$1'));
+
+    // הגנה 2: התיקון הקריטי למבחן המלא - חילוץ המערך מתוך האובייקט אם ה-AI עטף אותו בטעות
+    if (stepName === "משפטים" || stepName === "ניסוחים") {
+        if (!Array.isArray(parsedData)) {
+            // מחפש את המערך שמסתתר בתוך האובייקט
+            const possibleArrays = Object.values(parsedData).filter(val => Array.isArray(val));
+            if (possibleArrays.length > 0) {
+                parsedData = possibleArrays[0];
+            } else {
+                throw new Error(`ה-AI לא החזיר רשימת שאלות תקינה בשלב: ${stepName}`);
+            }
+        }
+    }
+    
+    return parsedData;
 }
 
 async function generateFullExam() {
